@@ -1,0 +1,465 @@
+/* ==================================================
+   CONFIGURAÇÕES GERAIS
+================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+
+body {
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #243044 0%,
+            #151c28 55%,
+            #0c1119 100%
+        );
+
+    color: #ffffff;
+
+    overflow: hidden;
+}
+
+
+/* ==================================================
+   CONTAINER
+================================================== */
+
+.container {
+    width: 100%;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* ==================================================
+   CABEÇALHO
+================================================== */
+
+.cabecalho {
+    width: 100%;
+
+    height: 85px;
+
+    padding: 0 35px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+
+.titulo {
+    font-size: 20px;
+    font-weight: bold;
+
+    letter-spacing: 2px;
+
+    color: #ffffff;
+}
+
+
+.relogio {
+    font-size: 25px;
+
+    font-weight: bold;
+
+    color: #cbd5e1;
+}
+
+
+/* ==================================================
+   CONTEÚDO
+================================================== */
+
+.conteudo {
+    flex: 1;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+}
+
+
+.area-reconhecimento {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* ==================================================
+   MOLDURA DO ROSTO
+================================================== */
+
+.moldura-rosto {
+    position: relative;
+
+    width: 285px;
+    height: 370px;
+
+    border-radius: 50%;
+
+    padding: 8px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+
+/*
+    Estado padrão:
+    procurando rosto
+*/
+
+.moldura-rosto.procurando {
+    border: 6px dashed #38bdf8;
+
+    box-shadow:
+        0 0 20px rgba(56, 189, 248, 0.30),
+        0 0 50px rgba(56, 189, 248, 0.12);
+
+    animation: pulsar 2s infinite;
+}
+
+
+/*
+    Pessoa reconhecida
+*/
+
+.moldura-rosto.reconhecido {
+    border: 6px dashed #00e676;
+
+    box-shadow:
+        0 0 20px rgba(0, 230, 118, 0.40),
+        0 0 60px rgba(0, 230, 118, 0.15);
+}
+
+
+/*
+    Pessoa não reconhecida
+*/
+
+.moldura-rosto.negado {
+    border: 6px dashed #ff3b3b;
+
+    box-shadow:
+        0 0 20px rgba(255, 59, 59, 0.40),
+        0 0 60px rgba(255, 59, 59, 0.15);
+}
+
+
+/* ==================================================
+   ÁREA DA CÂMERA
+================================================== */
+
+.camera {
+    width: 100%;
+    height: 100%;
+
+    border-radius: 50%;
+
+    overflow: hidden;
+
+    position: relative;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            #313c4c,
+            #1c2532
+        );
+
+    border: 2px solid rgba(255, 255, 255, 0.10);
+}
+
+
+/* Futuramente o vídeo pode utilizar esta classe */
+
+.camera video,
+.camera img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+}
+
+
+/* ==================================================
+   SILHUETA PROVISÓRIA
+================================================== */
+
+.silhueta {
+    width: 170px;
+    height: 230px;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    opacity: 0.22;
+}
+
+
+.cabeca {
+    width: 105px;
+    height: 105px;
+
+    background: #ffffff;
+
+    border-radius: 50%;
+
+    margin-bottom: 15px;
+}
+
+
+.corpo {
+    width: 165px;
+    height: 105px;
+
+    background: #ffffff;
+
+    border-radius:
+        90px
+        90px
+        20px
+        20px;
+}
+
+
+/* ==================================================
+   INFORMAÇÕES
+================================================== */
+
+.informacoes {
+    margin-top: 35px;
+
+    text-align: center;
+
+    width: 100%;
+}
+
+
+#nome-pessoa {
+    font-size: 35px;
+
+    font-weight: 600;
+
+    margin-bottom: 12px;
+}
+
+
+.mensagem {
+    font-size: 18px;
+
+    color: #aeb8c5;
+
+    margin-bottom: 25px;
+}
+
+
+/* ==================================================
+   STATUS
+================================================== */
+
+.status {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    padding: 12px 22px;
+
+    border-radius: 30px;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    transition: 0.3s;
+}
+
+
+/* Aguardando */
+
+.status.aguardando {
+    background: rgba(56, 189, 248, 0.12);
+
+    color: #38bdf8;
+
+    border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+
+/* Autorizado */
+
+.status.autorizado {
+    background: rgba(0, 230, 118, 0.12);
+
+    color: #00e676;
+
+    border: 1px solid rgba(0, 230, 118, 0.25);
+}
+
+
+/* Negado */
+
+.status.negado {
+    background: rgba(255, 59, 59, 0.12);
+
+    color: #ff5252;
+
+    border: 1px solid rgba(255, 59, 59, 0.25);
+}
+
+
+.status-icone {
+    font-size: 13px;
+}
+
+
+/* ==================================================
+   RODAPÉ
+================================================== */
+
+footer {
+    height: 60px;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    gap: 8px;
+
+    color: #718096;
+
+    font-size: 13px;
+}
+
+
+.indicador-online {
+    width: 8px;
+    height: 8px;
+
+    background: #00e676;
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 8px rgba(0, 230, 118, 0.7);
+}
+
+
+/* ==================================================
+   ANIMAÇÕES
+================================================== */
+
+@keyframes pulsar {
+
+    0% {
+        box-shadow:
+            0 0 10px rgba(56, 189, 248, 0.20);
+    }
+
+    50% {
+        box-shadow:
+            0 0 35px rgba(56, 189, 248, 0.50);
+    }
+
+    100% {
+        box-shadow:
+            0 0 10px rgba(56, 189, 248, 0.20);
+    }
+
+}
+
+
+/* ==================================================
+   TABLETS MENORES
+================================================== */
+
+@media (max-height: 700px) {
+
+    .cabecalho {
+        height: 65px;
+    }
+
+
+    .moldura-rosto {
+        width: 220px;
+        height: 285px;
+    }
+
+
+    .informacoes {
+        margin-top: 20px;
+    }
+
+
+    #nome-pessoa {
+        font-size: 28px;
+    }
+
+
+    .mensagem {
+        font-size: 15px;
+
+        margin-bottom: 15px;
+    }
+
+    .camera video {
+        transform: scaleX(-1);
+    }
+
+
+    footer {
+        height: 45px;
+    }
+
+}

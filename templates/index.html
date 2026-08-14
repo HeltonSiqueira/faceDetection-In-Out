@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no"
+    >
+
+    <title>Controle de Acesso</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+
+    <main class="container">
+
+        <!-- Cabeçalho -->
+        <header class="cabecalho">
+
+            <div class="titulo">
+                CONTROLE DE ACESSO
+            </div>
+
+            <div class="relogio" id="relogio">
+                00:00
+            </div>
+
+        </header>
+
+
+        <!-- Área principal -->
+        <section class="conteudo">
+
+            <div class="area-reconhecimento">
+
+                <!-- Moldura do reconhecimento -->
+                <div
+                    class="moldura-rosto procurando"
+                    id="moldura-rosto"
+                >
+
+                    <!--
+                        Posteriormente podemos trocar esta área
+                        pelo vídeo real vindo da câmera/Python.
+                    -->
+
+                    <div class="camera" id="camera">
+
+                        <video
+                            id="video"
+                            autoplay
+                            playsinline
+                            muted
+                        ></video>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Informações -->
+                <div class="informacoes">
+
+                    <h1 id="nome-pessoa">
+                        Posicione seu rosto
+                    </h1>
+
+                    <p
+                        id="mensagem"
+                        class="mensagem"
+                    >
+                        Olhe para a câmera para realizar a identificação
+                    </p>
+
+
+                    <!-- Status -->
+                    <div
+                        id="status"
+                        class="status aguardando"
+                    >
+
+                        <span class="status-icone">
+                            ●
+                        </span>
+
+                        <span id="status-texto">
+                            Aguardando reconhecimento
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Rodapé -->
+        <footer>
+
+            <span class="indicador-online"></span>
+
+            Sistema online
+
+        </footer>
+
+    </main>
+
+
+    <!-- Relógio -->
+    <script>
+
+        function atualizarRelogio() {
+
+            const agora = new Date();
+
+            const horas = agora
+                .getHours()
+                .toString()
+                .padStart(2, "0");
+
+            const minutos = agora
+                .getMinutes()
+                .toString()
+                .padStart(2, "0");
+
+            document.getElementById("relogio").innerText =
+                horas + ":" + minutos;
+        }
+
+        atualizarRelogio();
+
+        setInterval(atualizarRelogio, 1000);
+
+    </script>
+
+    <script>
+
+    async function iniciarCamera() {
+
+        try {
+
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: "user"
+                },
+                audio: false
+            });
+
+            const video = document.getElementById("video");
+
+            video.srcObject = stream;
+
+        } catch (erro) {
+
+            console.error("Erro ao acessar câmera:", erro);
+
+            document.getElementById("nome-pessoa").innerText =
+                "Não foi possível acessar a câmera";
+
+            document.getElementById("mensagem").innerText =
+                "Verifique a permissão da câmera no navegador";
+
+        }
+
+    }
+
+    iniciarCamera();
+
+</script>
+
+</body>
+
+</html>
