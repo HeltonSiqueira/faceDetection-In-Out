@@ -24,7 +24,9 @@ body {
 
     background: #0f172a;
 
-    color: #f8fafc;
+    color: #ffffff;
+
+    min-height: 100vh;
 }
 
 
@@ -34,11 +36,12 @@ body {
 
 .pagina {
     width: 100%;
-    max-width: 1450px;
+
+    max-width: 1400px;
 
     margin: 0 auto;
 
-    padding: 32px;
+    padding: 40px;
 }
 
 
@@ -47,31 +50,126 @@ body {
 ========================================================== */
 
 .cabecalho-admin {
+    width: 100%;
+
     display: flex;
 
     align-items: center;
     justify-content: space-between;
 
-    gap: 25px;
+    gap: 30px;
 
-    margin-bottom: 30px;
+    margin-bottom: 35px;
 }
 
 
 .cabecalho-admin h1 {
-    margin-bottom: 6px;
+    margin: 0 0 6px 0;
+
+    color: #ffffff;
 
     font-size: 30px;
     font-weight: 700;
-
-    color: #ffffff;
 }
 
 
 .cabecalho-admin p {
+    margin: 0;
+
     color: #94a3b8;
 
-    font-size: 15px;
+    font-size: 14px;
+}
+
+
+/* ==========================================================
+   AÇÕES DO CABEÇALHO
+========================================================== */
+
+.cabecalho-acoes {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 14px;
+
+    flex-wrap: wrap;
+}
+
+
+/* ==========================================================
+   BOTÃO CADASTRAR PESSOA
+========================================================== */
+
+a.botao-cadastrar {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 42px;
+
+    padding: 0 20px;
+
+    background: #2563eb;
+
+    border: 1px solid #3b82f6;
+
+    border-radius: 10px;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+a.botao-cadastrar:visited {
+    color: #ffffff;
+
+    text-decoration: none;
+}
+
+
+a.botao-cadastrar:hover {
+    background: #1d4ed8;
+
+    border-color: #2563eb;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 6px 18px
+        rgba(
+            37,
+            99,
+            235,
+            0.25
+        );
+}
+
+
+a.botao-cadastrar:active {
+    transform: translateY(0);
 }
 
 
@@ -80,77 +178,48 @@ body {
 ========================================================== */
 
 .status-atualizacao {
-    display: flex;
+    display: inline-flex;
 
     align-items: center;
+    justify-content: center;
 
     gap: 9px;
 
-    padding: 10px 14px;
+    min-height: 42px;
 
-    border: 1px solid rgba(
-        255,
-        255,
-        255,
-        0.08
-    );
-
-    border-radius: 999px;
+    padding: 0 16px;
 
     background: #1e293b;
 
+    border: 1px solid #334155;
+
+    border-radius: 999px;
+
     color: #94a3b8;
 
-    font-size: 13px;
+    font-size: 14px;
+
+    white-space: nowrap;
 }
 
 
-/* ==========================================================
-   INDICADOR
-========================================================== */
-
 .indicador-online {
-    width: 9px;
-    height: 9px;
+    width: 10px;
+    height: 10px;
+
+    flex-shrink: 0;
 
     border-radius: 50%;
 
-    display: block;
-
-    background: #00e676;
+    background: #00e68a;
 
     box-shadow:
-        0 0 8px rgba(
+        0 0 10px
+        rgba(
             0,
             230,
-            118,
-            0.75
-        );
-}
-
-
-.indicador-online.online {
-    background: #00e676;
-
-    box-shadow:
-        0 0 8px rgba(
-            0,
-            230,
-            118,
-            0.75
-        );
-}
-
-
-.indicador-online.offline {
-    background: #ff5252;
-
-    box-shadow:
-        0 0 8px rgba(
-            255,
-            82,
-            82,
-            0.75
+            138,
+            0.8
         );
 }
 
@@ -160,6 +229,8 @@ body {
 ========================================================== */
 
 .cards {
+    width: 100%;
+
     display: grid;
 
     grid-template-columns:
@@ -168,75 +239,63 @@ body {
             minmax(0, 1fr)
         );
 
-    gap: 20px;
+    gap: 24px;
 
-    margin-bottom: 28px;
+    margin-bottom: 36px;
 }
 
 
 .card {
-    min-height: 135px;
+    min-height: 165px;
 
     display: flex;
 
     flex-direction: column;
 
-    justify-content: space-between;
+    justify-content: center;
 
-    padding: 24px;
+    padding: 30px;
 
     background: #1e293b;
 
-    border: 1px solid rgba(
-        255,
-        255,
-        255,
-        0.08
-    );
+    border: 1px solid #334155;
 
-    border-radius: 15px;
+    border-radius: 18px;
 
     box-shadow:
-        0 10px 30px
+        0 8px 25px
         rgba(
             0,
             0,
             0,
-            0.12
+            0.10
         );
-
-    transition:
-        transform 0.2s ease,
-        border-color 0.2s ease;
-}
-
-
-.card:hover {
-    transform: translateY(-2px);
-
-    border-color: rgba(
-        56,
-        189,
-        248,
-        0.25
-    );
 }
 
 
 .card span {
+    display: block;
+
+    margin-bottom: 28px;
+
     color: #94a3b8;
 
-    font-size: 14px;
+    font-size: 15px;
+
+    font-weight: 500;
 }
 
 
 .card strong {
+    display: block;
+
     color: #ffffff;
 
-    font-size: 42px;
-    font-weight: 700;
+    font-size: 48px;
 
     line-height: 1;
+
+    font-weight: 700;
 }
 
 
@@ -245,23 +304,20 @@ body {
 ========================================================== */
 
 .painel {
-    margin-bottom: 25px;
+    width: 100%;
 
-    background: #1e293b;
-
-    border: 1px solid rgba(
-        255,
-        255,
-        255,
-        0.08
-    );
-
-    border-radius: 15px;
+    margin-bottom: 30px;
 
     overflow: hidden;
 
+    background: #1e293b;
+
+    border: 1px solid #334155;
+
+    border-radius: 18px;
+
     box-shadow:
-        0 8px 24px
+        0 8px 25px
         rgba(
             0,
             0,
@@ -272,7 +328,7 @@ body {
 
 
 /* ==========================================================
-   CABEÇALHO DO PAINEL
+   CABEÇALHO DOS PAINÉIS
 ========================================================== */
 
 .painel-cabecalho {
@@ -281,35 +337,39 @@ body {
     align-items: center;
     justify-content: space-between;
 
-    padding: 21px 23px;
+    gap: 20px;
 
-    border-bottom: 1px solid rgba(
-        255,
-        255,
-        255,
-        0.08
-    );
+    padding: 24px 28px;
+
+    border-bottom:
+        1px solid #334155;
 }
 
 
 .painel-cabecalho h2 {
-    margin-bottom: 5px;
+    margin: 0 0 7px 0;
 
     color: #ffffff;
 
     font-size: 20px;
+
+    font-weight: 600;
 }
 
 
 .painel-cabecalho p {
+    margin: 0;
+
     color: #94a3b8;
 
     font-size: 13px;
+
+    line-height: 1.5;
 }
 
 
 /* ==========================================================
-   TABELA
+   CONTAINER DA TABELA
 ========================================================== */
 
 .tabela-container {
@@ -319,69 +379,61 @@ body {
 }
 
 
+/* ==========================================================
+   TABELAS
+========================================================== */
+
 table {
     width: 100%;
 
     border-collapse: collapse;
+
+    border-spacing: 0;
 }
 
 
 thead {
-    background: #172033;
-}
-
-
-th,
-td {
-    padding: 15px 18px;
-
-    text-align: left;
-
-    vertical-align: middle;
-
-    border-bottom: 1px solid rgba(
-        255,
-        255,
-        255,
-        0.06
-    );
+    background: #111827;
 }
 
 
 th {
-    color: #94a3b8;
+    padding: 17px 28px;
+
+    color: #8fa8d6;
+
+    text-align: left;
 
     font-size: 12px;
+
     font-weight: 700;
 
     text-transform: uppercase;
 
-    letter-spacing: 0.7px;
+    letter-spacing: 0.6px;
 
-    white-space: nowrap;
+    border-bottom:
+        1px solid #334155;
 }
 
 
 td {
-    color: #dbe4ef;
+    padding: 18px 28px;
+
+    color: #e2e8f0;
 
     font-size: 14px;
-}
 
+    vertical-align: middle;
 
-tbody tr {
-    transition:
-        background 0.2s ease;
-}
-
-
-tbody tr:hover {
-    background: rgba(
-        255,
-        255,
-        255,
-        0.025
-    );
+    border-bottom:
+        1px solid
+        rgba(
+            51,
+            65,
+            85,
+            0.75
+        );
 }
 
 
@@ -390,77 +442,87 @@ tbody tr:last-child td {
 }
 
 
-/* ==========================================================
-   NOME
-========================================================== */
-
-.nome {
-    color: #ffffff;
-
-    font-weight: 700;
-}
-
-
-/* ==========================================================
-   CÓDIGO
-========================================================== */
-
-.codigo {
-    color: #38bdf8;
-
-    font-weight: 700;
-}
-
-
-/* ==========================================================
-   FOTO
-========================================================== */
-
-.foto-visitante {
-    display: block;
-
-    width: 58px;
-    height: 58px;
-
-    object-fit: cover;
-
-    object-position: center;
-
-    border-radius: 50%;
-
-    border: 2px solid rgba(
-        56,
-        189,
-        248,
-        0.55
-    );
-
-    background: #0f172a;
-
+tbody tr {
     transition:
-        transform 0.2s ease,
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
+        background 0.15s ease;
 }
 
 
-.foto-visitante:hover {
-    transform: scale(1.08);
-
-    border-color: #38bdf8;
-
-    box-shadow:
-        0 0 18px rgba(
-            56,
-            189,
-            248,
-            0.30
+tbody tr:hover {
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.025
         );
 }
 
 
 /* ==========================================================
-   BADGES
+   TABELA VAZIA
+========================================================== */
+
+.vazio {
+    padding: 40px 20px;
+
+    color: #64748b;
+
+    text-align: center;
+
+    font-size: 14px;
+}
+
+
+/* ==========================================================
+   FOTO DO VISITANTE
+========================================================== */
+
+.foto-visitante {
+    width: 52px;
+    height: 52px;
+
+    display: block;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    border:
+        2px solid #334155;
+
+    background: #0f172a;
+}
+
+
+/* ==========================================================
+   FOTO AUSENTE
+========================================================== */
+
+.foto-vazia {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #0f172a;
+
+    border:
+        2px solid #334155;
+
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+
+/* ==========================================================
+   STATUS / BADGES
 ========================================================== */
 
 .badge {
@@ -469,72 +531,195 @@ tbody tr:last-child td {
     align-items: center;
     justify-content: center;
 
-    padding: 6px 11px;
+    gap: 7px;
+
+    min-height: 30px;
+
+    padding: 0 12px;
 
     border-radius: 999px;
 
     font-size: 12px;
-    font-weight: 700;
+
+    font-weight: 600;
 
     white-space: nowrap;
 }
 
 
-.badge.presente {
-    color: #00e676;
-
-    background: rgba(
-        0,
-        230,
-        118,
-        0.12
-    );
-
-    border: 1px solid rgba(
-        0,
-        230,
-        118,
-        0.25
-    );
-}
-
-
-.badge.saiu {
-    color: #94a3b8;
-
-    background: rgba(
-        148,
-        163,
-        184,
-        0.10
-    );
-
-    border: 1px solid rgba(
-        148,
-        163,
-        184,
-        0.20
-    );
-}
-
-
 /* ==========================================================
-   SEM REGISTROS
+   PRESENTE
 ========================================================== */
 
-.vazio {
-    padding: 32px;
+.badge-presente {
+    background:
+        rgba(
+            0,
+            230,
+            138,
+            0.10
+        );
 
-    text-align: center;
+    border:
+        1px solid
+        rgba(
+            0,
+            230,
+            138,
+            0.30
+        );
 
-    color: #64748b;
+    color: #00e68a;
+}
 
-    font-size: 14px;
+
+.badge-presente::before {
+    content: "";
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #00e68a;
 }
 
 
 /* ==========================================================
-   BARRA DE ROLAGEM
+   SAIU
+========================================================== */
+
+.badge-saiu {
+    background:
+        rgba(
+            148,
+            163,
+            184,
+            0.10
+        );
+
+    border:
+        1px solid
+        rgba(
+            148,
+            163,
+            184,
+            0.25
+        );
+
+    color: #94a3b8;
+}
+
+
+.badge-saiu::before {
+    content: "";
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #94a3b8;
+}
+
+
+/* ==========================================================
+   ENTRADA
+========================================================== */
+
+.badge-entrada {
+    background:
+        rgba(
+            59,
+            130,
+            246,
+            0.10
+        );
+
+    border:
+        1px solid
+        rgba(
+            59,
+            130,
+            246,
+            0.30
+        );
+
+    color: #60a5fa;
+}
+
+
+/* ==========================================================
+   SAÍDA
+========================================================== */
+
+.badge-saida {
+    background:
+        rgba(
+            251,
+            146,
+            60,
+            0.10
+        );
+
+    border:
+        1px solid
+        rgba(
+            251,
+            146,
+            60,
+            0.30
+        );
+
+    color: #fb923c;
+}
+
+
+/* ==========================================================
+   TEXTO SECUNDÁRIO
+========================================================== */
+
+.texto-secundario {
+    color: #94a3b8;
+
+    font-size: 13px;
+}
+
+
+/* ==========================================================
+   CÓDIGO DO VISITANTE
+========================================================== */
+
+.codigo-visitante {
+    color: #38bdf8;
+
+    font-weight: 600;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+}
+
+
+/* ==========================================================
+   ID
+========================================================== */
+
+.id-registro {
+    color: #64748b;
+
+    font-size: 13px;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+}
+
+
+/* ==========================================================
+   SCROLL DA TABELA
 ========================================================== */
 
 .tabela-container::-webkit-scrollbar {
@@ -543,7 +728,7 @@ tbody tr:last-child td {
 
 
 .tabela-container::-webkit-scrollbar-track {
-    background: #172033;
+    background: #111827;
 }
 
 
@@ -560,18 +745,193 @@ tbody tr:last-child td {
 
 
 /* ==========================================================
-   TABLET
+   RESPONSIVIDADE - TABLET
 ========================================================== */
 
-@media (max-width: 1000px) {
+@media (
+    max-width: 1000px
+) {
 
     .pagina {
-        padding: 22px;
+        padding: 28px;
     }
 
 
     .cards {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+    }
+
+
+    .card:last-child {
+        grid-column:
+            1 / -1;
+    }
+
+
+    .cabecalho-admin {
+        align-items: flex-start;
+    }
+
+
+    .cabecalho-acoes {
+        flex-direction: column;
+
+        align-items: flex-end;
+    }
+
+}
+
+
+/* ==========================================================
+   RESPONSIVIDADE - CELULAR
+========================================================== */
+
+@media (
+    max-width: 700px
+) {
+
+    .pagina {
+        padding: 18px;
+    }
+
+
+    /* ------------------------------------------------------
+       CABEÇALHO
+    ------------------------------------------------------ */
+
+    .cabecalho-admin {
+        flex-direction: column;
+
+        align-items: stretch;
+
+        margin-bottom: 25px;
+    }
+
+
+    .cabecalho-admin h1 {
+        font-size: 25px;
+    }
+
+
+    .cabecalho-acoes {
+        width: 100%;
+
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+
+    a.botao-cadastrar {
+        width: 100%;
+
+        min-height: 46px;
+    }
+
+
+    .status-atualizacao {
+        width: 100%;
+
+        min-height: 46px;
+
+        justify-content: center;
+    }
+
+
+    /* ------------------------------------------------------
+       CARDS
+    ------------------------------------------------------ */
+
+    .cards {
+        grid-template-columns: 1fr;
+
         gap: 14px;
+
+        margin-bottom: 24px;
+    }
+
+
+    .card,
+    .card:last-child {
+        grid-column: auto;
+
+        min-height: 130px;
+
+        padding: 22px;
+    }
+
+
+    .card span {
+        margin-bottom: 18px;
+    }
+
+
+    .card strong {
+        font-size: 40px;
+    }
+
+
+    /* ------------------------------------------------------
+       PAINEL
+    ------------------------------------------------------ */
+
+    .painel {
+        border-radius: 14px;
+
+        margin-bottom: 20px;
+    }
+
+
+    .painel-cabecalho {
+        padding: 20px;
+    }
+
+
+    .painel-cabecalho h2 {
+        font-size: 18px;
+    }
+
+
+    /* ------------------------------------------------------
+       TABELA
+    ------------------------------------------------------ */
+
+    table {
+        min-width: 700px;
+    }
+
+
+    th {
+        padding: 15px 18px;
+    }
+
+
+    td {
+        padding: 16px 18px;
+    }
+
+}
+
+
+/* ==========================================================
+   TELAS MUITO PEQUENAS
+========================================================== */
+
+@media (
+    max-width: 420px
+) {
+
+    .pagina {
+        padding: 14px;
+    }
+
+
+    .cabecalho-admin h1 {
+        font-size: 22px;
     }
 
 
@@ -582,67 +942,6 @@ tbody tr:last-child td {
 
     .card strong {
         font-size: 36px;
-    }
-
-}
-
-
-/* ==========================================================
-   CELULAR
-========================================================== */
-
-@media (max-width: 800px) {
-
-    .pagina {
-        padding: 16px;
-    }
-
-
-    .cabecalho-admin {
-        flex-direction: column;
-
-        align-items: flex-start;
-
-        gap: 18px;
-    }
-
-
-    .cabecalho-admin h1 {
-        font-size: 26px;
-    }
-
-
-    .cards {
-        grid-template-columns: 1fr;
-
-        gap: 14px;
-    }
-
-
-    .card {
-        min-height: 110px;
-    }
-
-
-    .card strong {
-        font-size: 34px;
-    }
-
-
-    .painel-cabecalho {
-        padding: 18px;
-    }
-
-
-    th,
-    td {
-        padding: 13px 15px;
-    }
-
-
-    .foto-visitante {
-        width: 50px;
-        height: 50px;
     }
 
 }

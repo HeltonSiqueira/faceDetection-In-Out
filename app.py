@@ -21,17 +21,28 @@ from datetime import datetime
 
 from banco import (
     criar_tabelas,
+
+    cadastrar_pessoa,
+    buscar_pessoa_por_nome,
+    excluir_pessoa,
+
+    cadastrar_embedding,
+    contar_embeddings_pessoa,
     listar_embeddings,
+
     pessoa_esta_presente,
     registrar_entrada,
     registrar_saida,
+
     criar_visitante,
     atualizar_foto_visitante,
     listar_visitantes_presentes,
     registrar_saida_visitante,
+
     listar_presentes,
     listar_historico,
     listar_visitantes,
+
     contar_presentes,
     contar_visitantes_presentes
 )
@@ -46,6 +57,7 @@ from reconhecimento import (
     criar_detector,
     criar_reconhecedor,
     detectar_rosto,
+    gerar_embedding_imagem,
     reconhecer_identidade,
     embedding_para_bytes
 )
@@ -95,7 +107,7 @@ reconhecedor = criar_reconhecedor()
 
 
 # ============================================================
-# FORMATAR DATA/HORA
+# DATA/HORA BR
 # ============================================================
 
 def formatar_data_hora(
@@ -122,13 +134,7 @@ def formatar_data_hora(
         )
 
 
-# ============================================================
-# FILTRO JINJA
-# ============================================================
-
-@app.template_filter(
-    "data_br"
-)
+@app.template_filter("data_br")
 def filtro_data_br(
     valor
 ):
@@ -168,7 +174,7 @@ def normalizar_caminho_foto(
 
 
 # ============================================================
-# PÁGINA PADRÃO
+# PÁGINAS
 # ============================================================
 
 @app.route("/")
@@ -180,10 +186,6 @@ def pagina_inicial():
     )
 
 
-# ============================================================
-# TERMINAL DE ENTRADA
-# ============================================================
-
 @app.route("/entrada")
 def pagina_entrada():
 
@@ -192,10 +194,6 @@ def pagina_entrada():
         modo_terminal="ENTRADA"
     )
 
-
-# ============================================================
-# TERMINAL DE SAÍDA
-# ============================================================
 
 @app.route("/saida")
 def pagina_saida():
@@ -206,10 +204,6 @@ def pagina_saida():
     )
 
 
-# ============================================================
-# PAINEL ADMINISTRATIVO
-# ============================================================
-
 @app.route("/admin")
 def painel_admin():
 
@@ -218,20 +212,22 @@ def painel_admin():
     )
 
 
+@app.route("/admin/cadastrar")
+def pagina_cadastrar_pessoa():
+
+    return render_template(
+        "cadastro.html"
+    )
+
+
 # ============================================================
-# API DO PAINEL ADMINISTRATIVO
+# API ADMIN
 # ============================================================
 
-@app.route(
-    "/api/admin/dados"
-)
+@app.route("/api/admin/dados")
 def api_admin_dados():
 
     try:
-
-        # ====================================================
-        # DADOS DO BANCO
-        # ====================================================
 
         presentes_banco = (
             listar_presentes()
@@ -292,7 +288,7 @@ def api_admin_dados():
 
         for visitante in visitantes_banco:
 
-            caminho_foto = (
+            caminho = (
                 normalizar_caminho_foto(
                     visitante["foto"]
                 )
@@ -300,14 +296,11 @@ def api_admin_dados():
 
             foto_url = None
 
-            if caminho_foto:
+            if caminho:
 
                 foto_url = url_for(
-
                     "foto_visitante",
-
-                    nome_arquivo=caminho_foto
-
+                    nome_arquivo=caminho
                 )
 
             visitantes.append({
@@ -357,11 +350,6 @@ def api_admin_dados():
                         registro["id"]
                     ),
 
-                "pessoa_id":
-                    int(
-                        registro["pessoa_id"]
-                    ),
-
                 "nome":
                     registro["nome"],
 
@@ -378,10 +366,6 @@ def api_admin_dados():
                     else None
 
             })
-
-        # ====================================================
-        # RESPOSTA
-        # ====================================================
 
         return jsonify({
 
@@ -415,7 +399,7 @@ def api_admin_dados():
     except Exception as erro:
 
         print(
-            "Erro na API administrativa:",
+            "Erro API admin:",
             erro
         )
 
@@ -425,8 +409,254 @@ def api_admin_dados():
                 False,
 
             "mensagem":
-                "Erro ao carregar dados do painel"
+                "Erro ao carregar painel"
 
+        }), 500
+
+
+# ============================================================
+# INICIAR CADASTRO DE PESSOA
+# ============================================================
+
+@app.route(
+    "/api/cadastro/iniciar",
+    methods=["POST"]
+)
+def iniciar_cadastro_pessoa():
+
+    try:
+
+        dados = (
+            request.get_json()
+            or {}
+        )
+
+        nome = str(
+            dados.get(
+                "nome",
+                ""
+            )
+        ).strip()
+
+        if len(nome) < 2:
+
+            return jsonify({
+
+                "sucesso":
+                    False,
+
+                "mensagem":
+                    "Informe o nome da pessoa"
+
+            }), 400
+
+        pessoa_existente = (
+            buscar_pessoa_por_nome(
+                nome
+            )
+        )
+
+        if pessoa_existente:
+
+            return jsonify({
+
+                "sucesso":
+                    False,
+
+                "mensagem":
+                    "Já existe uma pessoa com esse nome"
+
+            }), 409
+
+        pessoa_id = (
+            cadastrar_pessoa(
+                nome
+            )
+        )
+
+        return jsonify({
+
+            "sucesso":
+                True,
+
+            "pessoa_id":
+                pessoa_id,
+
+            "nome":
+                nome
+
+        })
+
+    except Exception as erro:
+
+        print(
+            "Erro ao iniciar cadastro:",
+            erro
+        )
+
+        return jsonify({
+
+            "sucesso":
+                False,
+
+            "mensagem":
+                "Erro ao iniciar cadastro"
+
+        }), 500
+
+
+# ============================================================
+# SALVAR AMOSTRA DE PESSOA
+# ============================================================
+
+@app.route(
+    "/api/cadastro/amostra",
+    methods=["POST"]
+)
+def cadastrar_amostra_pessoa():
+
+    try:
+
+        dados = (
+            request.get_json()
+            or {}
+        )
+
+        pessoa_id = int(
+            dados.get(
+                "pessoa_id"
+            )
+        )
+
+        imagem = (
+            converter_base64_para_imagem(
+                dados.get(
+                    "imagem"
+                )
+            )
+        )
+
+        if imagem is None:
+
+            return jsonify({
+
+                "sucesso":
+                    False,
+
+                "mensagem":
+                    "Imagem inválida"
+
+            }), 400
+
+        embedding = (
+            gerar_embedding_imagem(
+
+                imagem,
+
+                detector,
+
+                reconhecedor
+
+            )
+        )
+
+        if embedding is None:
+
+            return jsonify({
+
+                "sucesso":
+                    False,
+
+                "mensagem":
+                    "Rosto não detectado"
+
+            }), 400
+
+        embedding_bytes = (
+            embedding_para_bytes(
+                embedding
+            )
+        )
+
+        cadastrar_embedding(
+            pessoa_id,
+            embedding_bytes
+        )
+
+        total = (
+            contar_embeddings_pessoa(
+                pessoa_id
+            )
+        )
+
+        return jsonify({
+
+            "sucesso":
+                True,
+
+            "total":
+                total
+
+        })
+
+    except Exception as erro:
+
+        print(
+            "Erro ao cadastrar amostra:",
+            erro
+        )
+
+        return jsonify({
+
+            "sucesso":
+                False,
+
+            "mensagem":
+                "Erro ao salvar amostra"
+
+        }), 500
+
+
+# ============================================================
+# CANCELAR CADASTRO
+# ============================================================
+
+@app.route(
+    "/api/cadastro/cancelar",
+    methods=["POST"]
+)
+def cancelar_cadastro_pessoa():
+
+    try:
+
+        dados = (
+            request.get_json()
+            or {}
+        )
+
+        pessoa_id = int(
+            dados.get(
+                "pessoa_id"
+            )
+        )
+
+        excluir_pessoa(
+            pessoa_id
+        )
+
+        return jsonify({
+            "sucesso": True
+        })
+
+    except Exception as erro:
+
+        print(
+            "Erro ao cancelar cadastro:",
+            erro
+        )
+
+        return jsonify({
+            "sucesso": False
         }), 500
 
 
@@ -442,16 +672,13 @@ def foto_visitante(
 ):
 
     return send_from_directory(
-
         PASTA_VISITANTES,
-
         nome_arquivo
-
     )
 
 
 # ============================================================
-# CONVERTER BASE64 PARA IMAGEM
+# BASE64 -> OPENCV
 # ============================================================
 
 def converter_base64_para_imagem(
@@ -461,11 +688,9 @@ def converter_base64_para_imagem(
     try:
 
         if not imagem_base64:
-
             return None
 
         if "," not in imagem_base64:
-
             return None
 
         _, dados = (
@@ -510,7 +735,7 @@ def converter_base64_para_imagem(
 
 
 # ============================================================
-# VERIFICAR POSICIONAMENTO DO ROSTO
+# VERIFICAR ROSTO
 # ============================================================
 
 @app.route(
@@ -521,30 +746,16 @@ def verificar_rosto():
 
     try:
 
-        dados = request.get_json()
-
-        if (
-            not dados
-            or
-            "imagem" not in dados
-        ):
-
-            return jsonify({
-
-                "rosto_detectado":
-                    False,
-
-                "posicionado":
-                    False,
-
-                "mensagem":
-                    "Imagem não recebida"
-
-            }), 400
+        dados = (
+            request.get_json()
+            or {}
+        )
 
         imagem = (
             converter_base64_para_imagem(
-                dados["imagem"]
+                dados.get(
+                    "imagem"
+                )
             )
         )
 
@@ -561,7 +772,7 @@ def verificar_rosto():
                 "mensagem":
                     "Imagem inválida"
 
-            }), 400
+            })
 
         face = detectar_rosto(
             imagem,
@@ -603,10 +814,6 @@ def verificar_rosto():
             face[3]
         )
 
-        # ====================================================
-        # CENTRO DO ROSTO
-        # ====================================================
-
         centro_rosto_x = (
             x
             +
@@ -619,10 +826,6 @@ def verificar_rosto():
             altura_rosto / 2
         )
 
-        # ====================================================
-        # CENTRO DA IMAGEM
-        # ====================================================
-
         centro_imagem_x = (
             largura / 2
         )
@@ -630,10 +833,6 @@ def verificar_rosto():
         centro_imagem_y = (
             altura / 2
         )
-
-        # ====================================================
-        # MARGENS
-        # ====================================================
 
         margem_x = (
             largura * 0.20
@@ -667,24 +866,16 @@ def verificar_rosto():
 
         )
 
-        # ====================================================
-        # TAMANHO
-        # ====================================================
-
-        proporcao_rosto = float(
-
+        proporcao_rosto = (
             largura_rosto
             /
             largura
-
         )
 
         tamanho_adequado = bool(
-
             proporcao_rosto
             >=
             0.25
-
         )
 
         posicionado = bool(
@@ -696,10 +887,6 @@ def verificar_rosto():
             tamanho_adequado
 
         )
-
-        # ====================================================
-        # MENSAGENS
-        # ====================================================
 
         if not tamanho_adequado:
 
@@ -739,7 +926,7 @@ def verificar_rosto():
     except Exception as erro:
 
         print(
-            "Erro na verificação:",
+            "Erro verificar rosto:",
             erro
         )
 
@@ -770,25 +957,21 @@ def salvar_foto_visitante(
         "%Y-%m-%d"
     )
 
-    pasta_data = (
+    pasta = (
         PASTA_VISITANTES
         /
         hoje
     )
 
-    pasta_data.mkdir(
+    pasta.mkdir(
         parents=True,
         exist_ok=True
     )
 
-    nome_arquivo = (
-        f"{codigo_temporario}.jpg"
-    )
-
     caminho = (
-        pasta_data
+        pasta
         /
-        nome_arquivo
+        f"{codigo_temporario}.jpg"
     )
 
     sucesso = cv2.imwrite(
@@ -797,7 +980,6 @@ def salvar_foto_visitante(
     )
 
     if not sucesso:
-
         return None
 
     return caminho
@@ -812,7 +994,11 @@ def registrar_novo_visitante(
     embedding
 ):
 
-    codigo_temporario = (
+    # --------------------------------------------------------
+    # NOME TEMPORÁRIO
+    # --------------------------------------------------------
+
+    temporario = (
         "TEMP_"
         +
         datetime.now().strftime(
@@ -820,16 +1006,20 @@ def registrar_novo_visitante(
         )
     )
 
-    caminho_temporario = (
+    caminho_temp = (
         salvar_foto_visitante(
             imagem,
-            codigo_temporario
+            temporario
         )
     )
 
-    if caminho_temporario is None:
+    if caminho_temp is None:
 
         return None
+
+    # --------------------------------------------------------
+    # EMBEDDING -> BYTES
+    # --------------------------------------------------------
 
     embedding_bytes = (
         embedding_para_bytes(
@@ -837,29 +1027,54 @@ def registrar_novo_visitante(
         )
     )
 
+    # --------------------------------------------------------
+    # CAMINHO TEMPORÁRIO RELATIVO
+    # --------------------------------------------------------
+
     caminho_relativo_temp = (
-        caminho_temporario
+        caminho_temp
         .relative_to(
             PASTA_PROJETO
         )
     )
 
-    visitante = criar_visitante(
+    # --------------------------------------------------------
+    # CRIA O VISITANTE NO BANCO
+    #
+    # O BANCO GERA:
+    # VIS-00001
+    # VIS-00002
+    # ...
+    # --------------------------------------------------------
 
-        embedding_bytes,
+    visitante = (
+        criar_visitante(
 
-        str(
-            caminho_relativo_temp
+            embedding_bytes,
+
+            str(
+                caminho_relativo_temp
+            )
+
         )
-
     )
 
-    codigo = visitante[
-        "codigo"
-    ]
+    # --------------------------------------------------------
+    # CÓDIGO DEFINITIVO
+    # --------------------------------------------------------
+
+    codigo = (
+        visitante[
+            "codigo"
+        ]
+    )
+
+    # --------------------------------------------------------
+    # CAMINHO DEFINITIVO
+    # --------------------------------------------------------
 
     novo_caminho = (
-        caminho_temporario
+        caminho_temp
         .with_name(
             f"{codigo}.jpg"
         )
@@ -867,9 +1082,23 @@ def registrar_novo_visitante(
 
     try:
 
-        caminho_temporario.rename(
+        # ====================================================
+        # RENOMEIA:
+        #
+        # TEMP_xxx.jpg
+        #
+        # PARA:
+        #
+        # VIS-00001.jpg
+        # ====================================================
+
+        caminho_temp.rename(
             novo_caminho
         )
+
+        # ====================================================
+        # CAMINHO RELATIVO DEFINITIVO
+        # ====================================================
 
         caminho_relativo = (
             novo_caminho
@@ -878,28 +1107,51 @@ def registrar_novo_visitante(
             )
         )
 
+        caminho_relativo_str = str(
+            caminho_relativo
+        )
+
+        # ====================================================
+        # IMPORTANTE:
+        #
+        # ATUALIZA O CAMINHO NO SQLITE.
+        #
+        # ISSO CORRIGE O PROBLEMA DOS TEMP_*.jpg
+        # ====================================================
+
         atualizar_foto_visitante(
 
-            visitante["id"],
+            visitante[
+                "id"
+            ],
 
-            str(
-                caminho_relativo
-            )
+            caminho_relativo_str
 
         )
 
+        # ====================================================
+        # ATUALIZA TAMBÉM O OBJETO LOCAL
+        # ====================================================
+
         visitante[
             "foto"
-        ] = str(
-            caminho_relativo
+        ] = caminho_relativo_str
+
+        print(
+            "Foto visitante:",
+            caminho_relativo_str
         )
 
     except Exception as erro:
 
         print(
-            "Erro ao renomear foto:",
+            "Erro ao renomear/atualizar foto do visitante:",
             erro
         )
+
+        # Se deu erro depois de salvar TEMP,
+        # ainda retornamos o visitante.
+        # Isso evita derrubar o fluxo de acesso.
 
     return visitante
 
@@ -916,30 +1168,16 @@ def processar_acesso():
 
     try:
 
-        dados = request.get_json()
-
-        if not dados:
-
-            return jsonify({
-
-                "sucesso":
-                    False,
-
-                "evento":
-                    "ERRO",
-
-                "mensagem":
-                    "Dados não recebidos"
-
-            }), 400
+        dados = (
+            request.get_json()
+            or {}
+        )
 
         modo = str(
-
             dados.get(
                 "modo",
                 ""
             )
-
         ).upper()
 
         if modo not in (
@@ -962,11 +1200,9 @@ def processar_acesso():
 
         imagem = (
             converter_base64_para_imagem(
-
                 dados.get(
                     "imagem"
                 )
-
             )
         )
 
@@ -985,34 +1221,20 @@ def processar_acesso():
 
             }), 400
 
-        # ====================================================
-        # CARREGAR BASES
-        # ====================================================
+        resultado = (
+            reconhecer_identidade(
 
-        embeddings_cadastrados = (
-            listar_embeddings()
-        )
+                imagem,
 
-        visitantes_presentes = (
-            listar_visitantes_presentes()
-        )
+                detector,
 
-        # ====================================================
-        # RECONHECIMENTO
-        # ====================================================
+                reconhecedor,
 
-        resultado = reconhecer_identidade(
+                listar_embeddings(),
 
-            imagem,
+                listar_visitantes_presentes()
 
-            detector,
-
-            reconhecedor,
-
-            embeddings_cadastrados,
-
-            visitantes_presentes
-
+            )
         )
 
         if not resultado[
@@ -1054,12 +1276,6 @@ def processar_acesso():
                 ]
             )
 
-            similaridade = float(
-                resultado[
-                    "similaridade"
-                ]
-            )
-
             presente = (
                 pessoa_esta_presente(
                     pessoa_id
@@ -1079,25 +1295,21 @@ def processar_acesso():
                         "sucesso":
                             True,
 
-                        "tipo":
-                            "PESSOA",
-
                         "evento":
                             "JA_PRESENTE",
 
                         "nome":
                             nome,
 
-                        "similaridade":
-                            similaridade,
-
                         "mensagem":
                             "Entrada já registrada"
 
                     })
 
-                horario = registrar_entrada(
-                    pessoa_id
+                horario = (
+                    registrar_entrada(
+                        pessoa_id
+                    )
                 )
 
                 return jsonify({
@@ -1105,17 +1317,11 @@ def processar_acesso():
                     "sucesso":
                         True,
 
-                    "tipo":
-                        "PESSOA",
-
                     "evento":
                         "ENTRADA",
 
                     "nome":
                         nome,
-
-                    "similaridade":
-                        similaridade,
 
                     "horario":
                         horario,
@@ -1129,60 +1335,48 @@ def processar_acesso():
             # SAÍDA
             # ------------------------------------------------
 
-            if modo == "SAIDA":
-
-                if not presente:
-
-                    return jsonify({
-
-                        "sucesso":
-                            False,
-
-                        "tipo":
-                            "PESSOA",
-
-                        "evento":
-                            "ENTRADA_NAO_LOCALIZADA",
-
-                        "nome":
-                            nome,
-
-                        "similaridade":
-                            similaridade,
-
-                        "mensagem":
-                            "Entrada não localizada"
-
-                    })
-
-                horario = registrar_saida(
-                    pessoa_id
-                )
+            if not presente:
 
                 return jsonify({
 
                     "sucesso":
-                        True,
-
-                    "tipo":
-                        "PESSOA",
+                        False,
 
                     "evento":
-                        "SAIDA",
+                        "ENTRADA_NAO_LOCALIZADA",
 
                     "nome":
                         nome,
 
-                    "similaridade":
-                        similaridade,
-
-                    "horario":
-                        horario,
-
                     "mensagem":
-                        "Saída registrada"
+                        "Entrada não localizada"
 
                 })
+
+            horario = (
+                registrar_saida(
+                    pessoa_id
+                )
+            )
+
+            return jsonify({
+
+                "sucesso":
+                    True,
+
+                "evento":
+                    "SAIDA",
+
+                "nome":
+                    nome,
+
+                "horario":
+                    horario,
+
+                "mensagem":
+                    "Saída registrada"
+
+            })
 
         # ====================================================
         # VISITANTE PRESENTE
@@ -1194,21 +1388,15 @@ def processar_acesso():
             "VISITANTE"
         ):
 
-            visitante_id = (
-                resultado[
-                    "visitante_id"
-                ]
-            )
-
             codigo = (
                 resultado[
                     "codigo"
                 ]
             )
 
-            similaridade = float(
+            visitante_id = (
                 resultado[
-                    "similaridade"
+                    "visitante_id"
                 ]
             )
 
@@ -1223,9 +1411,6 @@ def processar_acesso():
                     "sucesso":
                         True,
 
-                    "tipo":
-                        "VISITANTE",
-
                     "evento":
                         "VISITANTE_JA_PRESENTE",
 
@@ -1234,9 +1419,6 @@ def processar_acesso():
 
                     "codigo":
                         codigo,
-
-                    "similaridade":
-                        similaridade,
 
                     "mensagem":
                         "Entrada já registrada"
@@ -1247,158 +1429,115 @@ def processar_acesso():
             # SAÍDA
             # ------------------------------------------------
 
-            if modo == "SAIDA":
-
-                horario = (
-                    registrar_saida_visitante(
-                        visitante_id
-                    )
+            horario = (
+                registrar_saida_visitante(
+                    visitante_id
                 )
+            )
 
-                if horario is None:
-
-                    return jsonify({
-
-                        "sucesso":
-                            False,
-
-                        "tipo":
-                            "VISITANTE",
-
-                        "evento":
-                            "ENTRADA_NAO_LOCALIZADA",
-
-                        "mensagem":
-                            "Entrada não localizada"
-
-                    })
-
-                return jsonify({
-
-                    "sucesso":
-                        True,
-
-                    "tipo":
-                        "VISITANTE",
-
-                    "evento":
-                        "SAIDA_VISITANTE",
-
-                    "nome":
-                        codigo,
-
-                    "codigo":
-                        codigo,
-
-                    "similaridade":
-                        similaridade,
-
-                    "horario":
-                        horario,
-
-                    "mensagem":
-                        "Saída registrada"
-
-                })
-
-        # ====================================================
-        # DESCONHECIDO
-        # ====================================================
-
-        if (
-            resultado["tipo"]
-            ==
-            "DESCONHECIDO"
-        ):
-
-            # ------------------------------------------------
-            # NOVO VISITANTE
-            # ------------------------------------------------
-
-            if modo == "ENTRADA":
-
-                visitante = (
-                    registrar_novo_visitante(
-
-                        imagem,
-
-                        resultado[
-                            "embedding"
-                        ]
-
-                    )
-                )
-
-                if visitante is None:
-
-                    return jsonify({
-
-                        "sucesso":
-                            False,
-
-                        "evento":
-                            "ERRO_VISITANTE",
-
-                        "mensagem":
-                            "Não foi possível registrar visitante"
-
-                    }), 500
-
-                return jsonify({
-
-                    "sucesso":
-                        True,
-
-                    "tipo":
-                        "VISITANTE",
-
-                    "evento":
-                        "ENTRADA_VISITANTE",
-
-                    "nome":
-                        visitante[
-                            "codigo"
-                        ],
-
-                    "codigo":
-                        visitante[
-                            "codigo"
-                        ],
-
-                    "horario":
-                        visitante[
-                            "entrada"
-                        ],
-
-                    "mensagem":
-                        "Entrada registrada como visitante"
-
-                })
-
-            # ------------------------------------------------
-            # DESCONHECIDO TENTANDO SAIR
-            # ------------------------------------------------
-
-            if modo == "SAIDA":
+            if horario is None:
 
                 return jsonify({
 
                     "sucesso":
                         False,
 
-                    "tipo":
-                        "DESCONHECIDO",
-
                     "evento":
-                        "VISITANTE_NAO_LOCALIZADO",
+                        "ENTRADA_NAO_LOCALIZADA",
+
+                    "nome":
+                        codigo,
 
                     "mensagem":
-                        "Registro de entrada não localizado"
+                        "Entrada não localizada"
 
                 })
 
+            return jsonify({
+
+                "sucesso":
+                    True,
+
+                "evento":
+                    "SAIDA_VISITANTE",
+
+                "nome":
+                    codigo,
+
+                "codigo":
+                    codigo,
+
+                "horario":
+                    horario,
+
+                "mensagem":
+                    "Saída registrada"
+
+            })
+
         # ====================================================
-        # FALLBACK
+        # DESCONHECIDO
+        # ====================================================
+
+        if modo == "ENTRADA":
+
+            visitante = (
+                registrar_novo_visitante(
+
+                    imagem,
+
+                    resultado[
+                        "embedding"
+                    ]
+
+                )
+            )
+
+            if visitante is None:
+
+                return jsonify({
+
+                    "sucesso":
+                        False,
+
+                    "evento":
+                        "ERRO_VISITANTE",
+
+                    "mensagem":
+                        "Erro ao registrar visitante"
+
+                }), 500
+
+            return jsonify({
+
+                "sucesso":
+                    True,
+
+                "evento":
+                    "ENTRADA_VISITANTE",
+
+                "nome":
+                    visitante[
+                        "codigo"
+                    ],
+
+                "codigo":
+                    visitante[
+                        "codigo"
+                    ],
+
+                "horario":
+                    visitante[
+                        "entrada"
+                    ],
+
+                "mensagem":
+                    "Entrada registrada como visitante"
+
+            })
+
+        # ====================================================
+        # DESCONHECIDO TENTANDO SAIR
         # ====================================================
 
         return jsonify({
@@ -1407,17 +1546,17 @@ def processar_acesso():
                 False,
 
             "evento":
-                "ERRO",
+                "VISITANTE_NAO_LOCALIZADO",
 
             "mensagem":
-                "Não foi possível processar"
+                "Registro de entrada não localizado"
 
         })
 
     except Exception as erro:
 
         print(
-            "Erro ao processar acesso:",
+            "Erro processar acesso:",
             erro
         )
 
@@ -1436,7 +1575,7 @@ def processar_acesso():
 
 
 # ============================================================
-# INICIAR
+# INICIAR SERVIDOR
 # ============================================================
 
 if __name__ == "__main__":

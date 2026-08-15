@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Cadastro Facial
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/cadastro.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+    <main class="pagina-cadastro">
+
+
+        <header class="cabecalho">
+
+            <div>
+
+                <h1>
+                    Cadastro Facial
+                </h1>
+
+                <p>
+                    Cadastro de pessoa conhecida
+                </p>
+
+            </div>
+
+
+            <a
+                href="/admin"
+                class="botao-voltar"
+            >
+                Voltar
+            </a>
+
+        </header>
+
+
+        <!-- ==================================================
+             NOME
+        =================================================== -->
+
+        <section
+            class="card-cadastro"
+            id="etapa-nome"
+        >
+
+            <h2>
+                Identificação
+            </h2>
+
+            <p>
+                Informe o nome da pessoa.
+            </p>
+
+
+            <div class="campo">
+
+                <label for="nome">
+                    Nome
+                </label>
+
+                <input
+                    type="text"
+                    id="nome"
+                    autocomplete="off"
+                    placeholder="Ex.: João Silva"
+                >
+
+            </div>
+
+
+            <button
+                class="botao-principal"
+                id="botao-iniciar"
+            >
+                Iniciar cadastro facial
+            </button>
+
+
+            <div
+                class="erro"
+                id="erro-nome"
+            ></div>
+
+        </section>
+
+
+        <!-- ==================================================
+             CÂMERA
+        =================================================== -->
+
+        <section
+            class="area-camera oculto"
+            id="etapa-camera"
+        >
+
+
+            <div
+                class="moldura-rosto procurando"
+                id="moldura-rosto"
+            >
+
+
+                <div class="camera">
+
+                    <video
+                        id="video"
+                        autoplay
+                        playsinline
+                        muted
+                    ></video>
+
+
+                    <canvas
+                        id="canvas"
+                        hidden
+                    ></canvas>
+
+                </div>
+
+
+                <svg
+                    class="contorno-svg"
+                    viewBox="0 0 285 370"
+                    preserveAspectRatio="none"
+                >
+
+                    <ellipse
+                        class="contorno-elipse"
+                        cx="142.5"
+                        cy="185"
+                        rx="138"
+                        ry="180"
+                    ></ellipse>
+
+                </svg>
+
+
+            </div>
+
+
+            <div class="informacoes">
+
+                <h2 id="titulo-camera">
+                    Posicione seu rosto
+                </h2>
+
+                <p id="mensagem-camera">
+                    Olhe para a câmera
+                </p>
+
+
+                <div
+                    class="status"
+                    id="status"
+                >
+
+                    <span>
+                        ●
+                    </span>
+
+                    <span id="status-texto">
+                        Aguardando
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <script
+        src="{{ url_for('static', filename='js/cadastro.js') }}"
+    ></script>
+
+</body>
+
+</html>

@@ -1,0 +1,557 @@
+/* ==========================================================
+   RESET
+========================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
+
+
+body {
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #243044 0%,
+            #151c28 55%,
+            #0c1119 100%
+        );
+
+    color: #ffffff;
+}
+
+
+/* ==========================================================
+   PÁGINA
+========================================================== */
+
+.pagina-cadastro {
+    width: 100%;
+
+    max-width: 1000px;
+
+    min-height: 100vh;
+
+    margin: 0 auto;
+
+    padding: 32px;
+}
+
+
+/* ==========================================================
+   CABEÇALHO
+========================================================== */
+
+.cabecalho {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 40px;
+}
+
+
+.cabecalho h1 {
+    margin-bottom: 5px;
+
+    font-size: 30px;
+}
+
+
+.cabecalho p {
+    color: #94a3b8;
+
+    font-size: 14px;
+}
+
+
+.botao-voltar {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 42px;
+
+    padding: 0 18px;
+
+    border-radius: 9px;
+
+    background: #1e293b;
+
+    border: 1px solid rgba(
+        255,
+        255,
+        255,
+        0.10
+    );
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: bold;
+}
+
+
+/* ==========================================================
+   FORMULÁRIO
+========================================================== */
+
+.card-cadastro {
+    width: 100%;
+
+    max-width: 520px;
+
+    margin: 80px auto;
+
+    padding: 30px;
+
+    background: #1e293b;
+
+    border: 1px solid rgba(
+        255,
+        255,
+        255,
+        0.08
+    );
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 15px 40px
+        rgba(
+            0,
+            0,
+            0,
+            0.20
+        );
+}
+
+
+.card-cadastro h2 {
+    margin-bottom: 8px;
+
+    font-size: 25px;
+}
+
+
+.card-cadastro > p {
+    color: #94a3b8;
+
+    font-size: 14px;
+}
+
+
+/* ==========================================================
+   CAMPO
+========================================================== */
+
+.campo {
+    margin: 28px 0;
+}
+
+
+.campo label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #cbd5e1;
+
+    font-size: 14px;
+
+    font-weight: bold;
+}
+
+
+.campo input {
+    width: 100%;
+
+    min-height: 48px;
+
+    padding: 0 14px;
+
+    border: 1px solid #334155;
+
+    border-radius: 9px;
+
+    outline: none;
+
+    background: #0f172a;
+
+    color: #ffffff;
+
+    font-size: 16px;
+}
+
+
+.campo input:focus {
+    border-color: #38bdf8;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(
+            56,
+            189,
+            248,
+            0.10
+        );
+}
+
+
+/* ==========================================================
+   BOTÃO PRINCIPAL
+========================================================== */
+
+.botao-principal {
+    width: 100%;
+
+    min-height: 48px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 15px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+
+.botao-principal:disabled {
+    opacity: 0.5;
+
+    cursor: default;
+}
+
+
+/* ==========================================================
+   ERRO
+========================================================== */
+
+.erro {
+    min-height: 20px;
+
+    margin-top: 14px;
+
+    color: #ff5252;
+
+    font-size: 13px;
+}
+
+
+/* ==========================================================
+   OCULTO
+========================================================== */
+
+.oculto {
+    display: none !important;
+}
+
+
+/* ==========================================================
+   ÁREA DA CÂMERA
+========================================================== */
+
+.area-camera {
+    min-height: 650px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* ==========================================================
+   MOLDURA
+========================================================== */
+
+.moldura-rosto {
+    position: relative;
+
+    width: 285px;
+    height: 370px;
+
+    padding: 5px;
+}
+
+
+/* ==========================================================
+   CÂMERA
+========================================================== */
+
+.camera {
+    width: 100%;
+    height: 100%;
+
+    position: relative;
+
+    overflow: hidden;
+
+    border-radius: 50%;
+
+    background: #1c2532;
+}
+
+
+.camera video {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    transform: scaleX(-1);
+}
+
+
+/* ==========================================================
+   SVG
+========================================================== */
+
+.contorno-svg {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+}
+
+
+.contorno-elipse {
+    fill: none;
+
+    stroke: #38bdf8;
+
+    stroke-width: 4;
+
+    stroke-dasharray: 12 8;
+
+    stroke-dashoffset: 0;
+
+    filter:
+        drop-shadow(
+            0 0 6px
+            rgba(
+                56,
+                189,
+                248,
+                0.75
+            )
+        );
+}
+
+
+/* ==========================================================
+   PROCESSANDO
+========================================================== */
+
+.moldura-rosto.processando
+.contorno-elipse {
+
+    animation:
+        correr-tracejado
+        0.5s
+        linear
+        infinite;
+}
+
+
+/* ==========================================================
+   CONCLUÍDO
+========================================================== */
+
+.moldura-rosto.concluido
+.contorno-elipse {
+
+    stroke: #00e676;
+
+    animation: none;
+
+    filter:
+        drop-shadow(
+            0 0 8px
+            rgba(
+                0,
+                230,
+                118,
+                0.9
+            )
+        );
+}
+
+
+/* ==========================================================
+   ERRO
+========================================================== */
+
+.moldura-rosto.erro
+.contorno-elipse {
+
+    stroke: #ff5252;
+
+    animation: none;
+
+    filter:
+        drop-shadow(
+            0 0 8px
+            rgba(
+                255,
+                82,
+                82,
+                0.9
+            )
+        );
+}
+
+
+/* ==========================================================
+   ANIMAÇÃO
+========================================================== */
+
+@keyframes correr-tracejado {
+
+    from {
+        stroke-dashoffset: 0;
+    }
+
+    to {
+        stroke-dashoffset: -80;
+    }
+
+}
+
+
+/* ==========================================================
+   INFORMAÇÕES
+========================================================== */
+
+.informacoes {
+    margin-top: 35px;
+
+    text-align: center;
+}
+
+
+.informacoes h2 {
+    margin-bottom: 10px;
+
+    font-size: 30px;
+}
+
+
+.informacoes p {
+    color: #94a3b8;
+
+    font-size: 16px;
+}
+
+
+/* ==========================================================
+   STATUS
+========================================================== */
+
+.status {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 20px;
+
+    padding: 10px 18px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(
+            56,
+            189,
+            248,
+            0.12
+        );
+
+    border:
+        1px solid
+        rgba(
+            56,
+            189,
+            248,
+            0.25
+        );
+
+    color: #38bdf8;
+
+    font-size: 14px;
+
+    font-weight: bold;
+}
+
+
+/* ==========================================================
+   RESPONSIVO
+========================================================== */
+
+@media (max-width: 700px) {
+
+    .pagina-cadastro {
+        padding: 18px;
+    }
+
+
+    .cabecalho {
+        align-items: flex-start;
+    }
+
+
+    .cabecalho h1 {
+        font-size: 25px;
+    }
+
+
+    .card-cadastro {
+        margin-top: 45px;
+
+        padding: 22px;
+    }
+
+
+    .moldura-rosto {
+        width: 240px;
+        height: 312px;
+    }
+
+}

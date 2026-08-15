@@ -193,7 +193,7 @@ def cadastrar_pessoa(
         VALUES (?, ?, 1)
         """,
         (
-            nome,
+            nome.strip(),
             agora
         )
     )
@@ -205,6 +205,107 @@ def cadastrar_pessoa(
     conexao.close()
 
     return pessoa_id
+
+
+# ============================================================
+# BUSCAR PESSOA POR NOME
+# ============================================================
+
+def buscar_pessoa_por_nome(
+    nome
+):
+
+    conexao = conectar()
+
+    cursor = conexao.cursor()
+
+    cursor.execute(
+        """
+        SELECT
+            id,
+            nome,
+            data_cadastro,
+            ativo
+
+        FROM pessoas
+
+        WHERE LOWER(nome) = LOWER(?)
+
+        LIMIT 1
+        """,
+        (
+            nome.strip(),
+        )
+    )
+
+    pessoa = cursor.fetchone()
+
+    conexao.close()
+
+    return pessoa
+
+
+# ============================================================
+# LISTAR PESSOAS
+# ============================================================
+
+def listar_pessoas():
+
+    conexao = conectar()
+
+    cursor = conexao.cursor()
+
+    cursor.execute(
+        """
+        SELECT
+            id,
+            nome,
+            data_cadastro,
+            ativo
+
+        FROM pessoas
+
+        ORDER BY nome
+        """
+    )
+
+    registros = cursor.fetchall()
+
+    conexao.close()
+
+    return registros
+
+
+# ============================================================
+# EXCLUIR PESSOA
+# ============================================================
+
+def excluir_pessoa(
+    pessoa_id
+):
+
+    conexao = conectar()
+
+    cursor = conexao.cursor()
+
+    cursor.execute(
+        """
+        DELETE FROM pessoas
+
+        WHERE id = ?
+        """,
+        (
+            pessoa_id,
+        )
+    )
+
+    alterados = cursor.rowcount
+
+    conexao.commit()
+
+    conexao.close()
+
+    return alterados > 0
 
 
 # ============================================================
@@ -248,10 +349,12 @@ def cadastrar_embedding(
 
 
 # ============================================================
-# LISTAR PESSOAS
+# CONTAR EMBEDDINGS DA PESSOA
 # ============================================================
 
-def listar_pessoas():
+def contar_embeddings_pessoa(
+    pessoa_id
+):
 
     conexao = conectar()
 
@@ -259,23 +362,24 @@ def listar_pessoas():
 
     cursor.execute(
         """
-        SELECT
-            id,
-            nome,
-            data_cadastro,
-            ativo
+        SELECT COUNT(*) AS total
 
-        FROM pessoas
+        FROM embeddings
 
-        ORDER BY nome
-        """
+        WHERE pessoa_id = ?
+        """,
+        (
+            pessoa_id,
+        )
     )
 
-    registros = cursor.fetchall()
+    resultado = cursor.fetchone()
 
     conexao.close()
 
-    return registros
+    return int(
+        resultado["total"]
+    )
 
 
 # ============================================================
@@ -458,6 +562,7 @@ def registrar_saida(
             ORDER BY id DESC
 
             LIMIT 1
+
         )
         """,
         (
@@ -471,6 +576,82 @@ def registrar_saida(
     conexao.close()
 
     return agora
+
+
+# ============================================================
+# LISTAR PRESENTES
+# ============================================================
+
+def listar_presentes():
+
+    conexao = conectar()
+
+    cursor = conexao.cursor()
+
+    cursor.execute(
+        """
+        SELECT
+
+            pessoas.id,
+
+            pessoas.nome,
+
+            presentes.entrada
+
+        FROM presentes
+
+        INNER JOIN pessoas
+            ON pessoas.id = presentes.pessoa_id
+
+        ORDER BY presentes.entrada
+        """
+    )
+
+    registros = cursor.fetchall()
+
+    conexao.close()
+
+    return registros
+
+
+# ============================================================
+# LISTAR HISTÓRICO
+# ============================================================
+
+def listar_historico():
+
+    conexao = conectar()
+
+    cursor = conexao.cursor()
+
+    cursor.execute(
+        """
+        SELECT
+
+            historico.id,
+
+            pessoas.id AS pessoa_id,
+
+            pessoas.nome,
+
+            historico.entrada,
+
+            historico.saida
+
+        FROM historico
+
+        INNER JOIN pessoas
+            ON pessoas.id = historico.pessoa_id
+
+        ORDER BY historico.id DESC
+        """
+    )
+
+    registros = cursor.fetchall()
+
+    conexao.close()
+
+    return registros
 
 
 # ============================================================
@@ -539,15 +720,24 @@ def criar_visitante(
     conexao.close()
 
     return {
-        "id": visitante_id,
-        "codigo": codigo,
-        "entrada": agora,
-        "foto": caminho_foto
+
+        "id":
+            visitante_id,
+
+        "codigo":
+            codigo,
+
+        "entrada":
+            agora,
+
+        "foto":
+            caminho_foto
+
     }
 
 
 # ============================================================
-# ATUALIZAR FOTO DO VISITANTE
+# ATUALIZAR FOTO VISITANTE
 # ============================================================
 
 def atualizar_foto_visitante(
@@ -650,7 +840,7 @@ def listar_visitantes():
 
 
 # ============================================================
-# REGISTRAR SAÍDA VISITANTE
+# SAÍDA VISITANTE
 # ============================================================
 
 def registrar_saida_visitante(
@@ -695,77 +885,7 @@ def registrar_saida_visitante(
 
 
 # ============================================================
-# LISTAR PRESENTES
-# ============================================================
-
-def listar_presentes():
-
-    conexao = conectar()
-
-    cursor = conexao.cursor()
-
-    cursor.execute(
-        """
-        SELECT
-
-            pessoas.id,
-            pessoas.nome,
-            presentes.entrada
-
-        FROM presentes
-
-        INNER JOIN pessoas
-            ON pessoas.id = presentes.pessoa_id
-
-        ORDER BY presentes.entrada
-        """
-    )
-
-    registros = cursor.fetchall()
-
-    conexao.close()
-
-    return registros
-
-
-# ============================================================
-# LISTAR HISTÓRICO
-# ============================================================
-
-def listar_historico():
-
-    conexao = conectar()
-
-    cursor = conexao.cursor()
-
-    cursor.execute(
-        """
-        SELECT
-
-            historico.id,
-            pessoas.id AS pessoa_id,
-            pessoas.nome,
-            historico.entrada,
-            historico.saida
-
-        FROM historico
-
-        INNER JOIN pessoas
-            ON pessoas.id = historico.pessoa_id
-
-        ORDER BY historico.id DESC
-        """
-    )
-
-    registros = cursor.fetchall()
-
-    conexao.close()
-
-    return registros
-
-
-# ============================================================
-# CONTAR CADASTRADOS PRESENTES
+# CONTAR PRESENTES
 # ============================================================
 
 def contar_presentes():

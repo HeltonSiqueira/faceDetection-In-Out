@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 
 <head>
@@ -15,7 +14,6 @@
         Painel Administrativo
     </title>
 
-
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='css/admin.css') }}"
@@ -28,10 +26,6 @@
 
     <main class="pagina">
 
-
-        <!-- =====================================================
-             CABEÇALHO
-        ====================================================== -->
 
         <header class="cabecalho-admin">
 
@@ -48,28 +42,35 @@
             </div>
 
 
-            <div class="status-atualizacao">
+            <div class="cabecalho-acoes">
 
-                <span
-                    class="indicador-online"
-                    id="indicador-online"
-                ></span>
+                <a
+                    href="/admin/cadastrar"
+                    class="botao-cadastrar"
+                >
+                    + Cadastrar pessoa
+                </a>
 
-                <span id="texto-atualizacao">
-                    Atualização automática
-                </span>
+
+                <div class="status-atualizacao">
+
+                    <span
+                        class="indicador-online"
+                        id="indicador-online"
+                    ></span>
+
+                    <span id="texto-atualizacao">
+                        Atualização automática
+                    </span>
+
+                </div>
 
             </div>
 
         </header>
 
 
-        <!-- =====================================================
-             RESUMO
-        ====================================================== -->
-
         <section class="cards">
-
 
             <article class="card">
 
@@ -77,9 +78,7 @@
                     Total no ambiente
                 </span>
 
-                <strong
-                    id="total-ambiente"
-                >
+                <strong id="total-ambiente">
                     0
                 </strong>
 
@@ -92,9 +91,7 @@
                     Cadastrados presentes
                 </span>
 
-                <strong
-                    id="total-presentes"
-                >
+                <strong id="total-presentes">
                     0
                 </strong>
 
@@ -107,24 +104,16 @@
                     Visitantes presentes
                 </span>
 
-                <strong
-                    id="total-visitantes"
-                >
+                <strong id="total-visitantes">
                     0
                 </strong>
 
             </article>
 
-
         </section>
 
 
-        <!-- =====================================================
-             PESSOAS PRESENTES
-        ====================================================== -->
-
         <section class="painel">
-
 
             <div class="painel-cabecalho">
 
@@ -150,31 +139,15 @@
                     <thead>
 
                         <tr>
-
-                            <th>
-                                ID
-                            </th>
-
-                            <th>
-                                Nome
-                            </th>
-
-                            <th>
-                                Entrada
-                            </th>
-
-                            <th>
-                                Situação
-                            </th>
-
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Entrada</th>
+                            <th>Situação</th>
                         </tr>
 
                     </thead>
 
-
-                    <tbody
-                        id="tabela-presentes"
-                    >
+                    <tbody id="tabela-presentes">
 
                         <tr>
 
@@ -196,12 +169,7 @@
         </section>
 
 
-        <!-- =====================================================
-             VISITANTES
-        ====================================================== -->
-
         <section class="painel">
-
 
             <div class="painel-cabecalho">
 
@@ -227,35 +195,16 @@
                     <thead>
 
                         <tr>
-
-                            <th>
-                                Foto
-                            </th>
-
-                            <th>
-                                Código
-                            </th>
-
-                            <th>
-                                Entrada
-                            </th>
-
-                            <th>
-                                Saída
-                            </th>
-
-                            <th>
-                                Situação
-                            </th>
-
+                            <th>Foto</th>
+                            <th>Código</th>
+                            <th>Entrada</th>
+                            <th>Saída</th>
+                            <th>Situação</th>
                         </tr>
 
                     </thead>
 
-
-                    <tbody
-                        id="tabela-visitantes"
-                    >
+                    <tbody id="tabela-visitantes">
 
                         <tr>
 
@@ -277,12 +226,7 @@
         </section>
 
 
-        <!-- =====================================================
-             HISTÓRICO
-        ====================================================== -->
-
         <section class="painel">
-
 
             <div class="painel-cabecalho">
 
@@ -308,31 +252,15 @@
                     <thead>
 
                         <tr>
-
-                            <th>
-                                Registro
-                            </th>
-
-                            <th>
-                                Nome
-                            </th>
-
-                            <th>
-                                Entrada
-                            </th>
-
-                            <th>
-                                Saída
-                            </th>
-
+                            <th>Registro</th>
+                            <th>Nome</th>
+                            <th>Entrada</th>
+                            <th>Saída</th>
                         </tr>
 
                     </thead>
 
-
-                    <tbody
-                        id="tabela-historico"
-                    >
+                    <tbody id="tabela-historico">
 
                         <tr>
 
