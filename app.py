@@ -1581,11 +1581,11 @@ def processar_acesso():
 if __name__ == "__main__":
 
     app.run(
-
         host="0.0.0.0",
-
         port=5000,
-
-        debug=True
-
+        debug=True,
+        ssl_context=(
+            "10.91.171.57+2.pem",
+            "10.91.171.57+2-key.pem"
+        )
     )
