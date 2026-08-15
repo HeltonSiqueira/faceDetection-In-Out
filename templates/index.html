@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -9,49 +10,65 @@
         content="width=device-width, initial-scale=1.0, user-scalable=no"
     >
 
-    <title>Controle de Acesso</title>
+    <title>
+        Controle de Acesso
+    </title>
 
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='css/style.css') }}"
     >
+
 </head>
+
 
 <body>
 
     <main class="container">
 
-        <!-- Cabeçalho -->
+
+        <!-- =====================================================
+             CABEÇALHO
+        ====================================================== -->
+
         <header class="cabecalho">
 
             <div class="titulo">
                 CONTROLE DE ACESSO
             </div>
 
-            <div class="relogio" id="relogio">
+            <div
+                class="relogio"
+                id="relogio"
+            >
                 00:00
             </div>
 
         </header>
 
 
-        <!-- Área principal -->
+        <!-- =====================================================
+             CONTEÚDO
+        ====================================================== -->
+
         <section class="conteudo">
 
             <div class="area-reconhecimento">
 
-                <!-- Moldura do reconhecimento -->
+
+                <!-- =================================================
+                     MOLDURA
+                ================================================== -->
+
                 <div
                     class="moldura-rosto procurando"
                     id="moldura-rosto"
                 >
 
-                    <!--
-                        Posteriormente podemos trocar esta área
-                        pelo vídeo real vindo da câmera/Python.
-                    -->
-
-                    <div class="camera" id="camera">
+                    <div
+                        class="camera"
+                        id="camera"
+                    >
 
                         <video
                             id="video"
@@ -60,17 +77,27 @@
                             muted
                         ></video>
 
+
+                        <canvas
+                            id="canvas"
+                            style="display: none"
+                        ></canvas>
+
                     </div>
 
                 </div>
 
 
-                <!-- Informações -->
+                <!-- =================================================
+                     INFORMAÇÕES
+                ================================================== -->
+
                 <div class="informacoes">
 
                     <h1 id="nome-pessoa">
                         Posicione seu rosto
                     </h1>
+
 
                     <p
                         id="mensagem"
@@ -80,7 +107,6 @@
                     </p>
 
 
-                    <!-- Status -->
                     <div
                         id="status"
                         class="status aguardando"
@@ -103,7 +129,10 @@
         </section>
 
 
-        <!-- Rodapé -->
+        <!-- =====================================================
+             RODAPÉ
+        ====================================================== -->
+
         <footer>
 
             <span class="indicador-online"></span>
@@ -115,67 +144,779 @@
     </main>
 
 
-    <!-- Relógio -->
+    <!-- =========================================================
+         JAVASCRIPT
+    ========================================================== -->
+
     <script>
+
+        // =========================================================
+        // ELEMENTOS DA PÁGINA
+        // =========================================================
+
+        const video =
+            document.getElementById("video");
+
+        const canvas =
+            document.getElementById("canvas");
+
+        const moldura =
+            document.getElementById("moldura-rosto");
+
+        const nomePessoa =
+            document.getElementById("nome-pessoa");
+
+        const mensagem =
+            document.getElementById("mensagem");
+
+        const status =
+            document.getElementById("status");
+
+        const statusTexto =
+            document.getElementById("status-texto");
+
+
+        // =========================================================
+        // ESTADOS
+        // =========================================================
+
+        let capturaEmAndamento = false;
+
+        let verificacaoEmAndamento = false;
+
+        let aguardandoSaidaDoRosto = false;
+
+        let intervaloVerificacao = null;
+
+
+        // =========================================================
+        // RELÓGIO
+        // =========================================================
 
         function atualizarRelogio() {
 
-            const agora = new Date();
+            const agora =
+                new Date();
 
-            const horas = agora
-                .getHours()
-                .toString()
-                .padStart(2, "0");
 
-            const minutos = agora
-                .getMinutes()
-                .toString()
-                .padStart(2, "0");
+            const horas =
+                agora
+                    .getHours()
+                    .toString()
+                    .padStart(2, "0");
 
-            document.getElementById("relogio").innerText =
+
+            const minutos =
+                agora
+                    .getMinutes()
+                    .toString()
+                    .padStart(2, "0");
+
+
+            document.getElementById(
+                "relogio"
+            ).innerText =
                 horas + ":" + minutos;
+
         }
+
 
         atualizarRelogio();
 
-        setInterval(atualizarRelogio, 1000);
 
-    </script>
+        setInterval(
+            atualizarRelogio,
+            1000
+        );
 
-    <script>
 
-    async function iniciarCamera() {
+        // =========================================================
+        // INICIAR CÂMERA
+        // =========================================================
 
-        try {
+        async function iniciarCamera() {
 
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: "user"
-                },
-                audio: false
-            });
+            try {
 
-            const video = document.getElementById("video");
+                const stream =
+                    await navigator.mediaDevices.getUserMedia({
 
-            video.srcObject = stream;
+                        video: {
 
-        } catch (erro) {
+                            facingMode: "user",
 
-            console.error("Erro ao acessar câmera:", erro);
+                            width: {
+                                ideal: 640
+                            },
 
-            document.getElementById("nome-pessoa").innerText =
-                "Não foi possível acessar a câmera";
+                            height: {
+                                ideal: 480
+                            }
 
-            document.getElementById("mensagem").innerText =
-                "Verifique a permissão da câmera no navegador";
+                        },
+
+                        audio: false
+
+                    });
+
+
+                video.srcObject =
+                    stream;
+
+
+                video.onloadedmetadata =
+                    function () {
+
+                        console.log(
+                            "Câmera iniciada"
+                        );
+
+                        iniciarVerificacao();
+
+                    };
+
+            }
+
+            catch (erro) {
+
+                console.error(
+                    "Erro ao acessar câmera:",
+                    erro
+                );
+
+
+                nomePessoa.innerText =
+                    "Câmera indisponível";
+
+
+                mensagem.innerText =
+                    "Verifique a permissão da câmera";
+
+
+                statusTexto.innerText =
+                    "Câmera indisponível";
+
+            }
 
         }
 
-    }
 
-    iniciarCamera();
+        // =========================================================
+        // INICIAR VERIFICAÇÃO
+        // =========================================================
 
-</script>
+        function iniciarVerificacao() {
+
+            if (
+                intervaloVerificacao !== null
+            ) {
+
+                return;
+
+            }
+
+
+            intervaloVerificacao =
+                setInterval(
+
+                    function () {
+
+                        if (
+                            !verificacaoEmAndamento
+                        ) {
+
+                            capturarFrame();
+
+                        }
+
+                    },
+
+                    800
+
+                );
+
+        }
+
+
+        // =========================================================
+        // CAPTURAR FRAME
+        // =========================================================
+
+        function capturarFrame() {
+
+            if (
+                video.videoWidth === 0 ||
+                video.videoHeight === 0
+            ) {
+
+                return;
+
+            }
+
+
+            canvas.width =
+                video.videoWidth;
+
+
+            canvas.height =
+                video.videoHeight;
+
+
+            const contexto =
+                canvas.getContext("2d");
+
+
+            contexto.drawImage(
+
+                video,
+
+                0,
+                0,
+
+                canvas.width,
+                canvas.height
+
+            );
+
+
+            const imagem =
+                canvas.toDataURL(
+                    "image/jpeg",
+                    0.85
+                );
+
+
+            verificarRosto(
+                imagem
+            );
+
+        }
+
+
+        // =========================================================
+        // VERIFICAR ROSTO NO PYTHON
+        // =========================================================
+
+        async function verificarRosto(
+            imagem
+        ) {
+
+            if (
+                verificacaoEmAndamento
+            ) {
+
+                return;
+
+            }
+
+
+            verificacaoEmAndamento =
+                true;
+
+
+            try {
+
+                const resposta =
+                    await fetch(
+
+                        "/verificar-rosto",
+
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body: JSON.stringify({
+
+                                imagem: imagem
+
+                            })
+
+                        }
+
+                    );
+
+
+                if (!resposta.ok) {
+
+                    throw new Error(
+                        "Erro HTTP: "
+                        + resposta.status
+                    );
+
+                }
+
+
+                const dados =
+                    await resposta.json();
+
+
+                // =================================================
+                // AGUARDANDO PESSOA SAIR
+                // =================================================
+
+                if (
+                    aguardandoSaidaDoRosto
+                ) {
+
+                    // ---------------------------------------------
+                    // Ainda existe rosto na câmera
+                    // ---------------------------------------------
+
+                    if (
+                        dados.rosto_detectado
+                    ) {
+
+                        nomePessoa.innerText =
+                            "Registro concluído";
+
+
+                        mensagem.innerText =
+                            "Afaste-se da câmera para finalizar";
+
+
+                        statusTexto.innerText =
+                            "Aguardando saída";
+
+
+                        return;
+
+                    }
+
+
+                    // ---------------------------------------------
+                    // Rosto saiu da câmera
+                    // ---------------------------------------------
+
+                    liberarNovaCaptura();
+
+
+                    return;
+
+                }
+
+
+                // =================================================
+                // ATUALIZA MENSAGEM
+                // =================================================
+
+                if (
+                    dados.mensagem
+                ) {
+
+                    mensagem.innerText =
+                        dados.mensagem;
+
+                }
+
+
+                // =================================================
+                // SEM ROSTO
+                // =================================================
+
+                if (
+                    !dados.rosto_detectado
+                ) {
+
+                    nomePessoa.innerText =
+                        "Posicione seu rosto";
+
+
+                    statusTexto.innerText =
+                        "Aguardando reconhecimento";
+
+
+                    return;
+
+                }
+
+
+                // =================================================
+                // EXISTE ROSTO, MAS NÃO ESTÁ POSICIONADO
+                // =================================================
+
+                if (
+                    !dados.posicionado
+                ) {
+
+                    nomePessoa.innerText =
+                        "Posicione seu rosto";
+
+
+                    statusTexto.innerText =
+                        "Aguardando reconhecimento";
+
+
+                    return;
+
+                }
+
+
+                // =================================================
+                // ROSTO BEM POSICIONADO
+                // =================================================
+
+                if (
+                    dados.posicionado
+                    &&
+                    !capturaEmAndamento
+                ) {
+
+                    capturaEmAndamento =
+                        true;
+
+
+                    await rostoPosicionado(
+                        imagem
+                    );
+
+                }
+
+            }
+
+            catch (erro) {
+
+                console.error(
+                    "Erro ao verificar rosto:",
+                    erro
+                );
+
+
+                mensagem.innerText =
+                    "Erro na verificação";
+
+            }
+
+            finally {
+
+                verificacaoEmAndamento =
+                    false;
+
+            }
+
+        }
+
+
+        // =========================================================
+        // ROSTO POSICIONADO
+        // =========================================================
+
+        async function rostoPosicionado(
+            imagem
+        ) {
+
+            // -----------------------------------------------------
+            // INÍCIO DA CAPTURA
+            // -----------------------------------------------------
+
+            nomePessoa.innerText =
+                "Rosto detectado";
+
+
+            mensagem.innerText =
+                "Capturando imagem...";
+
+
+            statusTexto.innerText =
+                "Aguarde";
+
+
+            // -----------------------------------------------------
+            // ENVIA PARA O PYTHON
+            // -----------------------------------------------------
+
+            const resultado =
+                await enviarCapturaFinal(
+                    imagem
+                );
+
+
+            // =====================================================
+            // CAPTURA OK
+            // =====================================================
+
+            if (
+                resultado
+                &&
+                resultado.sucesso
+            ) {
+
+                // -------------------------------------------------
+                // BORDA VERDE
+                // -------------------------------------------------
+
+                moldura.classList.remove(
+                    "procurando"
+                );
+
+
+                moldura.classList.add(
+                    "reconhecido"
+                );
+
+
+                // -------------------------------------------------
+                // STATUS VERDE
+                // -------------------------------------------------
+
+                status.classList.remove(
+                    "aguardando"
+                );
+
+
+                status.classList.add(
+                    "autorizado"
+                );
+
+
+                nomePessoa.innerText =
+                    "Captura realizada";
+
+
+                mensagem.innerText =
+                    "Imagem capturada com sucesso";
+
+
+                statusTexto.innerText =
+                    "Capturado";
+
+
+                // -------------------------------------------------
+                // MOSTRA CONFIRMAÇÃO
+                // -------------------------------------------------
+
+                await esperar(
+                    2000
+                );
+
+
+                // -------------------------------------------------
+                // AGORA AGUARDA A PESSOA SAIR
+                // -------------------------------------------------
+
+                aguardandoSaidaDoRosto =
+                    true;
+
+
+                nomePessoa.innerText =
+                    "Registro concluído";
+
+
+                mensagem.innerText =
+                    "Afaste-se da câmera para finalizar";
+
+
+                statusTexto.innerText =
+                    "Aguardando saída";
+
+            }
+
+
+            // =====================================================
+            // ERRO NA CAPTURA
+            // =====================================================
+
+            else {
+
+                nomePessoa.innerText =
+                    "Não foi possível capturar";
+
+
+                mensagem.innerText =
+                    "Tente novamente";
+
+
+                statusTexto.innerText =
+                    "Erro na captura";
+
+
+                capturaEmAndamento =
+                    false;
+
+            }
+
+        }
+
+
+        // =========================================================
+        // ENVIAR CAPTURA FINAL
+        // =========================================================
+
+        async function enviarCapturaFinal(
+            imagem
+        ) {
+
+            try {
+
+                const resposta =
+                    await fetch(
+
+                        "/capturar-rosto",
+
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body: JSON.stringify({
+
+                                imagem: imagem
+
+                            })
+
+                        }
+
+                    );
+
+
+                if (!resposta.ok) {
+
+                    throw new Error(
+                        "Erro HTTP: "
+                        + resposta.status
+                    );
+
+                }
+
+
+                const dados =
+                    await resposta.json();
+
+
+                console.log(
+                    "Captura:",
+                    dados
+                );
+
+
+                return dados;
+
+            }
+
+            catch (erro) {
+
+                console.error(
+                    "Erro ao enviar captura:",
+                    erro
+                );
+
+
+                return {
+
+                    sucesso: false
+
+                };
+
+            }
+
+        }
+
+
+        // =========================================================
+        // LIBERAR NOVA CAPTURA
+        // =========================================================
+
+        function liberarNovaCaptura() {
+
+            aguardandoSaidaDoRosto =
+                false;
+
+
+            capturaEmAndamento =
+                false;
+
+
+            // -----------------------------------------------------
+            // VERDE -> AZUL
+            // -----------------------------------------------------
+
+            moldura.classList.remove(
+                "reconhecido"
+            );
+
+
+            moldura.classList.add(
+                "procurando"
+            );
+
+
+            status.classList.remove(
+                "autorizado"
+            );
+
+
+            status.classList.add(
+                "aguardando"
+            );
+
+
+            // -----------------------------------------------------
+            // TEXTOS INICIAIS
+            // -----------------------------------------------------
+
+            nomePessoa.innerText =
+                "Posicione seu rosto";
+
+
+            mensagem.innerText =
+                "Olhe para a câmera para realizar a identificação";
+
+
+            statusTexto.innerText =
+                "Aguardando reconhecimento";
+
+
+            console.log(
+                "Sistema liberado para nova captura"
+            );
+
+        }
+
+
+        // =========================================================
+        // ESPERA
+        // =========================================================
+
+        function esperar(
+            milissegundos
+        ) {
+
+            return new Promise(
+
+                function (resolve) {
+
+                    setTimeout(
+                        resolve,
+                        milissegundos
+                    );
+
+                }
+
+            );
+
+        }
+
+
+        // =========================================================
+        // INICIAR SISTEMA
+        // =========================================================
+
+        iniciarCamera();
+
+    </script>
+
 
 </body>
 
