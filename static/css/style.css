@@ -8,11 +8,13 @@
     box-sizing: border-box;
 }
 
+
 html,
 body {
     width: 100%;
     height: 100%;
 }
+
 
 body {
     font-family:
@@ -35,7 +37,7 @@ body {
 
 
 /* ==================================================
-   CONTAINER PRINCIPAL
+   CONTAINER
 ================================================== */
 
 .container {
@@ -61,8 +63,15 @@ body {
     align-items: center;
     justify-content: space-between;
 
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom:
+        1px solid rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
 }
+
 
 .titulo {
     font-size: 20px;
@@ -72,6 +81,7 @@ body {
 
     color: #ffffff;
 }
+
 
 .relogio {
     font-size: 25px;
@@ -96,6 +106,7 @@ body {
     padding: 20px;
 }
 
+
 .area-reconhecimento {
     width: 100%;
 
@@ -108,7 +119,7 @@ body {
 
 
 /* ==================================================
-   MOLDURA DO ROSTO
+   MOLDURA PRINCIPAL
 ================================================== */
 
 .moldura-rosto {
@@ -119,75 +130,17 @@ body {
 
     border-radius: 50%;
 
-    /*
-        Distância entre o tracejado
-        e a imagem da câmera.
-
-        Para deixar ainda mais próximo,
-        teste 2px, 1px ou 0.
-    */
-    padding: 3px;
+    padding: 5px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
-
-    transition:
-        border-color 0.3s ease,
-        box-shadow 0.3s ease;
 }
 
 
 /* ==================================================
-   ESTADO: PROCURANDO
-================================================== */
-
-.moldura-rosto.procurando {
-    /*
-        4px = espessura do tracejado
-    */
-    border: 4px dashed #38bdf8;
-
-    box-shadow:
-        0 0 20px rgba(56, 189, 248, 0.30),
-        0 0 50px rgba(56, 189, 248, 0.12);
-
-    animation: pulsar 2s infinite;
-}
-
-
-/* ==================================================
-   ESTADO: RECONHECIDO / CAPTURADO
-================================================== */
-
-.moldura-rosto.reconhecido {
-    border: 4px dashed #00e676;
-
-    box-shadow:
-        0 0 25px rgba(0, 230, 118, 0.50),
-        0 0 60px rgba(0, 230, 118, 0.25);
-
-    animation: none;
-}
-
-
-/* ==================================================
-   ESTADO: NEGADO
-================================================== */
-
-.moldura-rosto.negado {
-    border: 4px dashed #ff3b3b;
-
-    box-shadow:
-        0 0 20px rgba(255, 59, 59, 0.40),
-        0 0 60px rgba(255, 59, 59, 0.15);
-
-    animation: none;
-}
-
-
-/* ==================================================
-   ÁREA DA CÂMERA
+   CÂMERA
 ================================================== */
 
 .camera {
@@ -207,17 +160,14 @@ body {
 
     background: #1c2532;
 
-    /*
-        Removemos a borda interna
-        para aproximar visualmente
-        o vídeo do tracejado.
-    */
     border: none;
+
+    z-index: 1;
 }
 
 
 /* ==================================================
-   VÍDEO DA CÂMERA
+   VÍDEO
 ================================================== */
 
 .camera video {
@@ -229,7 +179,7 @@ body {
     border-radius: 50%;
 
     /*
-        Espelha a câmera como um espelho.
+        Efeito de espelho.
     */
     transform: scaleX(-1);
 }
@@ -256,56 +206,176 @@ body {
 .camera canvas {
     position: absolute;
 
-    width: 100%;
-    height: 100%;
-
     top: 0;
     left: 0;
+
+    width: 100%;
+    height: 100%;
 
     border-radius: 50%;
 }
 
 
 /* ==================================================
-   SILHUETA
-   Mantida caso queira utilizar futuramente.
+   SVG DO CONTORNO
 ================================================== */
 
-.silhueta {
-    width: 170px;
-    height: 230px;
+.contorno-svg {
+    position: absolute;
 
-    display: flex;
-    flex-direction: column;
+    top: 0;
+    left: 0;
 
-    align-items: center;
-    justify-content: flex-end;
+    width: 100%;
+    height: 100%;
 
-    opacity: 0.22;
+    pointer-events: none;
+
+    overflow: visible;
+
+    z-index: 2;
 }
 
-.cabeca {
-    width: 105px;
-    height: 105px;
 
-    background: #ffffff;
+/* ==================================================
+   ELIPSE TRACEJADA
 
-    border-radius: 50%;
+   12 = tamanho do traço
+   8  = espaço entre os traços
 
-    margin-bottom: 15px;
+   12 + 8 = ciclo de 20 unidades
+================================================== */
+
+.contorno-elipse {
+    fill: none;
+
+    stroke: #38bdf8;
+
+    stroke-width: 4;
+
+    stroke-dasharray: 12 8;
+
+    stroke-dashoffset: 0;
+
+    stroke-linecap: butt;
+
+    transition:
+        stroke 0.3s ease,
+        filter 0.3s ease;
 }
 
-.corpo {
-    width: 165px;
-    height: 105px;
 
-    background: #ffffff;
+/* ==================================================
+   AGUARDANDO PESSOA
 
-    border-radius:
-        90px
-        90px
-        20px
-        20px;
+   O tracejado fica parado.
+   Apenas o brilho pulsa.
+================================================== */
+
+.moldura-rosto.procurando
+.contorno-elipse {
+
+    stroke: #38bdf8;
+
+    filter:
+        drop-shadow(
+            0 0 6px
+            rgba(
+                56,
+                189,
+                248,
+                0.75
+            )
+        );
+
+    animation:
+        pulsar-contorno
+        2s
+        ease-in-out
+        infinite;
+}
+
+
+/* ==================================================
+   PROCESSANDO
+
+   IMPORTANTE:
+
+   A elipse NÃO gira.
+
+   O stroke-dashoffset faz os segmentos
+   percorrerem o caminho da elipse.
+================================================== */
+
+.moldura-rosto.processando
+.contorno-elipse {
+
+    stroke: #38bdf8;
+
+    filter:
+        drop-shadow(
+            0 0 9px
+            rgba(
+                56,
+                189,
+                248,
+                1
+            )
+        );
+
+    animation:
+        correr-tracejado
+        0.5s
+        linear
+        infinite;
+}
+
+
+/* ==================================================
+   CADASTRO CONCLUÍDO
+================================================== */
+
+.moldura-rosto.reconhecido
+.contorno-elipse {
+
+    stroke: #00e676;
+
+    filter:
+        drop-shadow(
+            0 0 8px
+            rgba(
+                0,
+                230,
+                118,
+                0.90
+            )
+        );
+
+    animation: none;
+}
+
+
+/* ==================================================
+   ACESSO NEGADO
+================================================== */
+
+.moldura-rosto.negado
+.contorno-elipse {
+
+    stroke: #ff3b3b;
+
+    filter:
+        drop-shadow(
+            0 0 8px
+            rgba(
+                255,
+                59,
+                59,
+                0.90
+            )
+        );
+
+    animation: none;
 }
 
 
@@ -321,6 +391,7 @@ body {
     width: 100%;
 }
 
+
 #nome-pessoa {
     font-size: 35px;
 
@@ -328,6 +399,7 @@ body {
 
     margin-bottom: 12px;
 }
+
 
 .mensagem {
     font-size: 18px;
@@ -358,47 +430,123 @@ body {
 
     font-weight: bold;
 
-    transition: 0.3s;
+    transition:
+        background 0.3s ease,
+        color 0.3s ease,
+        border-color 0.3s ease;
 }
 
 
 /* ==================================================
-   STATUS: AGUARDANDO
+   STATUS AGUARDANDO
 ================================================== */
 
 .status.aguardando {
-    background: rgba(56, 189, 248, 0.12);
+    background:
+        rgba(
+            56,
+            189,
+            248,
+            0.12
+        );
 
     color: #38bdf8;
 
-    border: 1px solid rgba(56, 189, 248, 0.25);
+    border:
+        1px solid rgba(
+            56,
+            189,
+            248,
+            0.25
+        );
 }
 
 
 /* ==================================================
-   STATUS: AUTORIZADO
+   STATUS PROCESSANDO
+================================================== */
+
+.status.processando-status {
+    background:
+        rgba(
+            56,
+            189,
+            248,
+            0.14
+        );
+
+    color: #38bdf8;
+
+    border:
+        1px solid rgba(
+            56,
+            189,
+            248,
+            0.35
+        );
+}
+
+
+.status.processando-status
+.status-icone {
+
+    animation:
+        piscar
+        0.8s
+        ease-in-out
+        infinite;
+}
+
+
+/* ==================================================
+   STATUS AUTORIZADO
 ================================================== */
 
 .status.autorizado {
-    background: rgba(0, 230, 118, 0.12);
+    background:
+        rgba(
+            0,
+            230,
+            118,
+            0.12
+        );
 
     color: #00e676;
 
-    border: 1px solid rgba(0, 230, 118, 0.25);
+    border:
+        1px solid rgba(
+            0,
+            230,
+            118,
+            0.25
+        );
 }
 
 
 /* ==================================================
-   STATUS: NEGADO
+   STATUS NEGADO
 ================================================== */
 
 .status.negado {
-    background: rgba(255, 59, 59, 0.12);
+    background:
+        rgba(
+            255,
+            59,
+            59,
+            0.12
+        );
 
     color: #ff5252;
 
-    border: 1px solid rgba(255, 59, 59, 0.25);
+    border:
+        1px solid rgba(
+            255,
+            59,
+            59,
+            0.25
+        );
 }
+
 
 .status-icone {
     font-size: 13px;
@@ -424,6 +572,7 @@ footer {
     font-size: 13px;
 }
 
+
 .indicador-online {
     width: 8px;
     height: 8px;
@@ -433,29 +582,80 @@ footer {
     border-radius: 50%;
 
     box-shadow:
-        0 0 8px rgba(0, 230, 118, 0.70);
+        0 0 8px
+        rgba(
+            0,
+            230,
+            118,
+            0.70
+        );
 }
 
 
 /* ==================================================
-   ANIMAÇÃO DA MOLDURA AZUL
+   MOVIMENTO DO TRACEJADO
+
+   A elipse permanece parada.
+
+   Somente os traços caminham pelo contorno.
+
+   Como o padrão é:
+       12 + 8 = 20
+
+   usamos -100, que é múltiplo de 20.
+   Isso mantém o loop contínuo.
 ================================================== */
 
-@keyframes pulsar {
+@keyframes correr-tracejado {
+
+    from {
+        stroke-dashoffset: 0;
+    }
+
+    to {
+        stroke-dashoffset: -60;
+    }
+
+}
+
+
+/* ==================================================
+   PULSO DA MOLDURA QUANDO ESTÁ AGUARDANDO
+================================================== */
+
+@keyframes pulsar-contorno {
 
     0% {
-        box-shadow:
-            0 0 10px rgba(56, 189, 248, 0.20);
+        opacity: 0.70;
     }
 
     50% {
-        box-shadow:
-            0 0 35px rgba(56, 189, 248, 0.50);
+        opacity: 1;
     }
 
     100% {
-        box-shadow:
-            0 0 10px rgba(56, 189, 248, 0.20);
+        opacity: 0.70;
+    }
+
+}
+
+
+/* ==================================================
+   PISCAR O PONTO DE PROCESSAMENTO
+================================================== */
+
+@keyframes piscar {
+
+    0% {
+        opacity: 0.20;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.20;
     }
 
 }
@@ -471,26 +671,31 @@ footer {
         height: 65px;
     }
 
+
     .moldura-rosto {
         width: 220px;
         height: 285px;
 
-        padding: 3px;
+        padding: 4px;
     }
+
 
     .informacoes {
         margin-top: 20px;
     }
 
+
     #nome-pessoa {
         font-size: 28px;
     }
+
 
     .mensagem {
         font-size: 15px;
 
         margin-bottom: 15px;
     }
+
 
     footer {
         height: 45px;

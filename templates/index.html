@@ -10,9 +10,7 @@
         content="width=device-width, initial-scale=1.0, user-scalable=no"
     >
 
-    <title>
-        Controle de Acesso
-    </title>
+    <title>Controle de Acesso</title>
 
     <link
         rel="stylesheet"
@@ -34,14 +32,20 @@
         <header class="cabecalho">
 
             <div class="titulo">
-                CONTROLE DE ACESSO
+
+                CONTROLE DE ACESSO -
+                {{ modo_terminal }}
+
             </div>
+
 
             <div
                 class="relogio"
                 id="relogio"
             >
+
                 00:00
+
             </div>
 
         </header>
@@ -57,13 +61,14 @@
 
 
                 <!-- =================================================
-                     MOLDURA
+                     ROSTO
                 ================================================== -->
 
                 <div
                     class="moldura-rosto procurando"
                     id="moldura-rosto"
                 >
+
 
                     <div
                         class="camera"
@@ -85,6 +90,27 @@
 
                     </div>
 
+
+                    <!-- =============================================
+                         CONTORNO SVG
+                    ============================================== -->
+
+                    <svg
+                        class="contorno-svg"
+                        viewBox="0 0 285 370"
+                        preserveAspectRatio="none"
+                    >
+
+                        <ellipse
+                            class="contorno-elipse"
+                            cx="142.5"
+                            cy="185"
+                            rx="138"
+                            ry="180"
+                        ></ellipse>
+
+                    </svg>
+
                 </div>
 
 
@@ -103,7 +129,7 @@
                         id="mensagem"
                         class="mensagem"
                     >
-                        Olhe para a câmera para realizar a identificação
+                        Olhe para a câmera
                     </p>
 
 
@@ -115,6 +141,7 @@
                         <span class="status-icone">
                             ●
                         </span>
+
 
                         <span id="status-texto">
                             Aguardando reconhecimento
@@ -137,7 +164,7 @@
 
             <span class="indicador-online"></span>
 
-            Sistema online
+            Terminal {{ modo_terminal }}
 
         </footer>
 
@@ -151,42 +178,85 @@
     <script>
 
         // =========================================================
-        // ELEMENTOS DA PÁGINA
+        // MODO DO TERMINAL
+        // =========================================================
+
+        const MODO_TERMINAL =
+            "{{ modo_terminal }}";
+
+
+        // =========================================================
+        // CONFIGURAÇÕES
+        // =========================================================
+
+        const TEMPO_RESULTADO =
+            2500;
+
+
+        // =========================================================
+        // ELEMENTOS
         // =========================================================
 
         const video =
-            document.getElementById("video");
+            document.getElementById(
+                "video"
+            );
+
 
         const canvas =
-            document.getElementById("canvas");
+            document.getElementById(
+                "canvas"
+            );
+
 
         const moldura =
-            document.getElementById("moldura-rosto");
+            document.getElementById(
+                "moldura-rosto"
+            );
+
 
         const nomePessoa =
-            document.getElementById("nome-pessoa");
+            document.getElementById(
+                "nome-pessoa"
+            );
+
 
         const mensagem =
-            document.getElementById("mensagem");
+            document.getElementById(
+                "mensagem"
+            );
+
 
         const status =
-            document.getElementById("status");
+            document.getElementById(
+                "status"
+            );
+
 
         const statusTexto =
-            document.getElementById("status-texto");
+            document.getElementById(
+                "status-texto"
+            );
 
 
         // =========================================================
         // ESTADOS
         // =========================================================
 
-        let capturaEmAndamento = false;
+        let verificacaoEmAndamento =
+            false;
 
-        let verificacaoEmAndamento = false;
 
-        let aguardandoSaidaDoRosto = false;
+        let processamentoEmAndamento =
+            false;
 
-        let intervaloVerificacao = null;
+
+        let aguardandoPessoaSair =
+            false;
+
+
+        let intervaloVerificacao =
+            null;
 
 
         // =========================================================
@@ -203,20 +273,30 @@
                 agora
                     .getHours()
                     .toString()
-                    .padStart(2, "0");
+                    .padStart(
+                        2,
+                        "0"
+                    );
 
 
             const minutos =
                 agora
                     .getMinutes()
                     .toString()
-                    .padStart(2, "0");
+                    .padStart(
+                        2,
+                        "0"
+                    );
 
 
             document.getElementById(
                 "relogio"
             ).innerText =
-                horas + ":" + minutos;
+                horas
+                +
+                ":"
+                +
+                minutos;
 
         }
 
@@ -231,7 +311,7 @@
 
 
         // =========================================================
-        // INICIAR CÂMERA
+        // CÂMERA
         // =========================================================
 
         async function iniciarCamera() {
@@ -243,7 +323,8 @@
 
                         video: {
 
-                            facingMode: "user",
+                            facingMode:
+                                "user",
 
                             width: {
                                 ideal: 640
@@ -267,10 +348,6 @@
                 video.onloadedmetadata =
                     function () {
 
-                        console.log(
-                            "Câmera iniciada"
-                        );
-
                         iniciarVerificacao();
 
                     };
@@ -280,7 +357,7 @@
             catch (erro) {
 
                 console.error(
-                    "Erro ao acessar câmera:",
+                    "Erro ao iniciar câmera:",
                     erro
                 );
 
@@ -302,13 +379,15 @@
 
 
         // =========================================================
-        // INICIAR VERIFICAÇÃO
+        // VERIFICAÇÃO PERIÓDICA
         // =========================================================
 
         function iniciarVerificacao() {
 
             if (
-                intervaloVerificacao !== null
+                intervaloVerificacao
+                !==
+                null
             ) {
 
                 return;
@@ -323,9 +402,11 @@
 
                         if (
                             !verificacaoEmAndamento
+                            &&
+                            !processamentoEmAndamento
                         ) {
 
-                            capturarFrame();
+                            verificarFrameAtual();
 
                         }
 
@@ -339,17 +420,18 @@
 
 
         // =========================================================
-        // CAPTURAR FRAME
+        // GERAR IMAGEM
         // =========================================================
 
-        function capturarFrame() {
+        function gerarImagemAtual() {
 
             if (
-                video.videoWidth === 0 ||
+                video.videoWidth === 0
+                ||
                 video.videoHeight === 0
             ) {
 
-                return;
+                return null;
 
             }
 
@@ -363,7 +445,9 @@
 
 
             const contexto =
-                canvas.getContext("2d");
+                canvas.getContext(
+                    "2d"
+                );
 
 
             contexto.drawImage(
@@ -379,31 +463,28 @@
             );
 
 
-            const imagem =
-                canvas.toDataURL(
-                    "image/jpeg",
-                    0.85
-                );
+            return canvas.toDataURL(
 
+                "image/jpeg",
 
-            verificarRosto(
-                imagem
+                0.90
+
             );
 
         }
 
 
         // =========================================================
-        // VERIFICAR ROSTO NO PYTHON
+        // VERIFICAR ROSTO
         // =========================================================
 
-        async function verificarRosto(
-            imagem
-        ) {
+        async function verificarFrameAtual() {
 
-            if (
-                verificacaoEmAndamento
-            ) {
+            const imagem =
+                gerarImagemAtual();
+
+
+            if (!imagem) {
 
                 return;
 
@@ -423,7 +504,8 @@
 
                         {
 
-                            method: "POST",
+                            method:
+                                "POST",
 
                             headers: {
 
@@ -432,11 +514,13 @@
 
                             },
 
-                            body: JSON.stringify({
+                            body:
+                                JSON.stringify({
 
-                                imagem: imagem
+                                    imagem:
+                                        imagem
 
-                            })
+                                })
 
                         }
 
@@ -447,7 +531,8 @@
 
                     throw new Error(
                         "Erro HTTP: "
-                        + resposta.status
+                        +
+                        resposta.status
                     );
 
                 }
@@ -458,60 +543,27 @@
 
 
                 // =================================================
-                // AGUARDANDO PESSOA SAIR
+                // AGUARDA PESSOA SAIR
                 // =================================================
 
                 if (
-                    aguardandoSaidaDoRosto
+                    aguardandoPessoaSair
                 ) {
 
-                    // ---------------------------------------------
-                    // Ainda existe rosto na câmera
-                    // ---------------------------------------------
-
                     if (
-                        dados.rosto_detectado
+                        !dados.rosto_detectado
                     ) {
 
-                        nomePessoa.innerText =
-                            "Registro concluído";
+                        aguardandoPessoaSair =
+                            false;
 
 
-                        mensagem.innerText =
-                            "Afaste-se da câmera para finalizar";
-
-
-                        statusTexto.innerText =
-                            "Aguardando saída";
-
-
-                        return;
+                        voltarParaAguardando();
 
                     }
 
 
-                    // ---------------------------------------------
-                    // Rosto saiu da câmera
-                    // ---------------------------------------------
-
-                    liberarNovaCaptura();
-
-
                     return;
-
-                }
-
-
-                // =================================================
-                // ATUALIZA MENSAGEM
-                // =================================================
-
-                if (
-                    dados.mensagem
-                ) {
-
-                    mensagem.innerText =
-                        dados.mensagem;
 
                 }
 
@@ -528,6 +580,10 @@
                         "Posicione seu rosto";
 
 
+                    mensagem.innerText =
+                        "Olhe para a câmera";
+
+
                     statusTexto.innerText =
                         "Aguardando reconhecimento";
 
@@ -538,7 +594,7 @@
 
 
                 // =================================================
-                // EXISTE ROSTO, MAS NÃO ESTÁ POSICIONADO
+                // FORA DA POSIÇÃO
                 // =================================================
 
                 if (
@@ -549,8 +605,12 @@
                         "Posicione seu rosto";
 
 
+                    mensagem.innerText =
+                        dados.mensagem;
+
+
                     statusTexto.innerText =
-                        "Aguardando reconhecimento";
+                        "Ajuste sua posição";
 
 
                     return;
@@ -559,31 +619,19 @@
 
 
                 // =================================================
-                // ROSTO BEM POSICIONADO
+                // ROSTO OK
                 // =================================================
 
-                if (
-                    dados.posicionado
-                    &&
-                    !capturaEmAndamento
-                ) {
-
-                    capturaEmAndamento =
-                        true;
-
-
-                    await rostoPosicionado(
-                        imagem
-                    );
-
-                }
+                await processarAcesso(
+                    imagem
+                );
 
             }
 
             catch (erro) {
 
                 console.error(
-                    "Erro ao verificar rosto:",
+                    "Erro na verificação:",
                     erro
                 );
 
@@ -604,164 +652,93 @@
 
 
         // =========================================================
-        // ROSTO POSICIONADO
+        // PROCESSAR ACESSO
         // =========================================================
 
-        async function rostoPosicionado(
+        async function processarAcesso(
             imagem
         ) {
 
-            // -----------------------------------------------------
-            // INÍCIO DA CAPTURA
-            // -----------------------------------------------------
+            if (
+                processamentoEmAndamento
+            ) {
+
+                return;
+
+            }
+
+
+            processamentoEmAndamento =
+                true;
+
+
+            // =====================================================
+            // ESTADO PROCESSANDO
+            // =====================================================
+
+            moldura.classList.remove(
+                "procurando"
+            );
+
+
+            moldura.classList.remove(
+                "reconhecido"
+            );
+
+
+            moldura.classList.remove(
+                "negado"
+            );
+
+
+            moldura.classList.add(
+                "processando"
+            );
+
+
+            status.classList.remove(
+                "aguardando"
+            );
+
+
+            status.classList.remove(
+                "autorizado"
+            );
+
+
+            status.classList.remove(
+                "negado"
+            );
+
+
+            status.classList.add(
+                "processando-status"
+            );
+
 
             nomePessoa.innerText =
-                "Rosto detectado";
+                "Identificando...";
 
 
             mensagem.innerText =
-                "Capturando imagem...";
-
-
-            statusTexto.innerText =
                 "Aguarde";
 
 
-            // -----------------------------------------------------
-            // ENVIA PARA O PYTHON
-            // -----------------------------------------------------
+            statusTexto.innerText =
+                "Processando";
 
-            const resultado =
-                await enviarCapturaFinal(
-                    imagem
-                );
-
-
-            // =====================================================
-            // CAPTURA OK
-            // =====================================================
-
-            if (
-                resultado
-                &&
-                resultado.sucesso
-            ) {
-
-                // -------------------------------------------------
-                // BORDA VERDE
-                // -------------------------------------------------
-
-                moldura.classList.remove(
-                    "procurando"
-                );
-
-
-                moldura.classList.add(
-                    "reconhecido"
-                );
-
-
-                // -------------------------------------------------
-                // STATUS VERDE
-                // -------------------------------------------------
-
-                status.classList.remove(
-                    "aguardando"
-                );
-
-
-                status.classList.add(
-                    "autorizado"
-                );
-
-
-                nomePessoa.innerText =
-                    "Captura realizada";
-
-
-                mensagem.innerText =
-                    "Imagem capturada com sucesso";
-
-
-                statusTexto.innerText =
-                    "Capturado";
-
-
-                // -------------------------------------------------
-                // MOSTRA CONFIRMAÇÃO
-                // -------------------------------------------------
-
-                await esperar(
-                    2000
-                );
-
-
-                // -------------------------------------------------
-                // AGORA AGUARDA A PESSOA SAIR
-                // -------------------------------------------------
-
-                aguardandoSaidaDoRosto =
-                    true;
-
-
-                nomePessoa.innerText =
-                    "Registro concluído";
-
-
-                mensagem.innerText =
-                    "Afaste-se da câmera para finalizar";
-
-
-                statusTexto.innerText =
-                    "Aguardando saída";
-
-            }
-
-
-            // =====================================================
-            // ERRO NA CAPTURA
-            // =====================================================
-
-            else {
-
-                nomePessoa.innerText =
-                    "Não foi possível capturar";
-
-
-                mensagem.innerText =
-                    "Tente novamente";
-
-
-                statusTexto.innerText =
-                    "Erro na captura";
-
-
-                capturaEmAndamento =
-                    false;
-
-            }
-
-        }
-
-
-        // =========================================================
-        // ENVIAR CAPTURA FINAL
-        // =========================================================
-
-        async function enviarCapturaFinal(
-            imagem
-        ) {
 
             try {
 
                 const resposta =
                     await fetch(
 
-                        "/capturar-rosto",
+                        "/processar-acesso",
 
                         {
 
-                            method: "POST",
+                            method:
+                                "POST",
 
                             headers: {
 
@@ -770,11 +747,16 @@
 
                             },
 
-                            body: JSON.stringify({
+                            body:
+                                JSON.stringify({
 
-                                imagem: imagem
+                                    modo:
+                                        MODO_TERMINAL,
 
-                            })
+                                    imagem:
+                                        imagem
+
+                                })
 
                         }
 
@@ -785,7 +767,8 @@
 
                     throw new Error(
                         "Erro HTTP: "
-                        + resposta.status
+                        +
+                        resposta.status
                     );
 
                 }
@@ -795,29 +778,23 @@
                     await resposta.json();
 
 
-                console.log(
-                    "Captura:",
+                await mostrarResultado(
                     dados
                 );
-
-
-                return dados;
 
             }
 
             catch (erro) {
 
                 console.error(
-                    "Erro ao enviar captura:",
+                    "Erro ao processar acesso:",
                     erro
                 );
 
 
-                return {
-
-                    sucesso: false
-
-                };
+                mostrarErro(
+                    "Erro ao processar acesso"
+                );
 
             }
 
@@ -825,25 +802,535 @@
 
 
         // =========================================================
-        // LIBERAR NOVA CAPTURA
+        // MOSTRAR RESULTADO
         // =========================================================
 
-        function liberarNovaCaptura() {
+        async function mostrarResultado(
+            dados
+        ) {
 
-            aguardandoSaidaDoRosto =
+            moldura.classList.remove(
+                "processando"
+            );
+
+
+            status.classList.remove(
+                "processando-status"
+            );
+
+
+            // =====================================================
+            // PESSOA CADASTRADA - ENTRADA
+            // =====================================================
+
+            if (
+                dados.evento
+                ===
+                "ENTRADA"
+            ) {
+
+                aplicarVerde();
+
+
+                nomePessoa.innerText =
+                    dados.nome;
+
+
+                mensagem.innerText =
+                    "Entrada registrada";
+
+
+                statusTexto.innerText =
+                    "Acesso liberado";
+
+            }
+
+
+            // =====================================================
+            // PESSOA CADASTRADA - SAÍDA
+            // =====================================================
+
+            else if (
+                dados.evento
+                ===
+                "SAIDA"
+            ) {
+
+                aplicarVerde();
+
+
+                nomePessoa.innerText =
+                    dados.nome;
+
+
+                mensagem.innerText =
+                    "Saída registrada";
+
+
+                statusTexto.innerText =
+                    "Saída autorizada";
+
+            }
+
+
+            // =====================================================
+            // PESSOA CADASTRADA - JÁ PRESENTE
+            // =====================================================
+
+            else if (
+                dados.evento
+                ===
+                "JA_PRESENTE"
+            ) {
+
+                aplicarVerde();
+
+
+                nomePessoa.innerText =
+                    dados.nome;
+
+
+                mensagem.innerText =
+                    "Entrada já registrada";
+
+
+                statusTexto.innerText =
+                    "Acesso liberado";
+
+            }
+
+
+            // =====================================================
+            // PESSOA CADASTRADA - SEM ENTRADA
+            // =====================================================
+
+            else if (
+                dados.evento
+                ===
+                "ENTRADA_NAO_LOCALIZADA"
+            ) {
+
+                aplicarVermelho();
+
+
+                nomePessoa.innerText =
+                    dados.nome
+                    ||
+                    "Pessoa identificada";
+
+
+                mensagem.innerText =
+                    "Entrada não localizada";
+
+
+                statusTexto.innerText =
+                    "Saída não registrada";
+
+            }
+
+
+            // =====================================================
+            // VISITANTE NOVO - ENTRADA
+            // =====================================================
+
+            else if (
+                dados.evento
+                ===
+                "ENTRADA_VISITANTE"
+            ) {
+
+                aplicarVerde();
+
+
+                nomePessoa.innerText =
+                    "Pessoa não identificada";
+
+
+                mensagem.innerText =
+                    "Entrada registrada como visitante";
+
+
+                statusTexto.innerText =
+                    "Acesso liberado";
+
+            }
+
+
+            // =====================================================
+            // VISITANTE JÁ ESTÁ PRESENTE
+            // =====================================================
+
+            else if (
+                dados.evento
+                ===
+                "VISITANTE_JA_PRESENTE"
+            ) {
+
+                aplicarVerde();
+
+
+                nomePessoa.innerText =
+                    "Visitante";
+
+
+                mensagem.innerText =
+                    "Entrada já registrada";
+
+
+                statusTexto.innerText =
+                    "Acesso liberado";
+
+            }
+
+
+            // =====================================================
+            // VISITANTE - SAÍDA
+            // =====================================================
+
+            else if (
+                dados.evento
+                ===
+                "SAIDA_VISITANTE"
+            ) {
+
+                aplicarVerde();
+
+
+                nomePessoa.innerText =
+                    "Visitante";
+
+
+                mensagem.innerText =
+                    "Saída registrada";
+
+
+                statusTexto.innerText =
+                    "Saída autorizada";
+
+            }
+
+
+            // =====================================================
+            // VISITANTE NÃO LOCALIZADO NA SAÍDA
+            // =====================================================
+
+            else if (
+                dados.evento
+                ===
+                "VISITANTE_NAO_LOCALIZADO"
+            ) {
+
+                aplicarVermelho();
+
+
+                nomePessoa.innerText =
+                    "Pessoa não identificada";
+
+
+                mensagem.innerText =
+                    "Registro de entrada não localizado";
+
+
+                statusTexto.innerText =
+                    "Saída não registrada";
+
+            }
+
+
+            // =====================================================
+            // NÃO RECONHECIDO
+            // =====================================================
+
+            else if (
+                dados.evento
+                ===
+                "NAO_RECONHECIDO"
+            ) {
+
+                aplicarVermelho();
+
+
+                nomePessoa.innerText =
+                    "Pessoa não identificada";
+
+
+                mensagem.innerText =
+                    "Cadastro não encontrado";
+
+
+                statusTexto.innerText =
+                    "Não autorizado";
+
+            }
+
+
+            // =====================================================
+            // ERRO AO CRIAR VISITANTE
+            // =====================================================
+
+            else if (
+                dados.evento
+                ===
+                "ERRO_VISITANTE"
+            ) {
+
+                aplicarVermelho();
+
+
+                nomePessoa.innerText =
+                    "Erro no registro";
+
+
+                mensagem.innerText =
+                    "Não foi possível registrar visitante";
+
+
+                statusTexto.innerText =
+                    "Tente novamente";
+
+            }
+
+
+            // =====================================================
+            // OUTRO ERRO
+            // =====================================================
+
+            else {
+
+                aplicarVermelho();
+
+
+                nomePessoa.innerText =
+                    "Não foi possível processar";
+
+
+                mensagem.innerText =
+                    dados.mensagem
+                    ||
+                    "Tente novamente";
+
+
+                statusTexto.innerText =
+                    "Erro";
+
+            }
+
+
+            // =====================================================
+            // TEMPO PARA VISUALIZAR RESULTADO
+            // =====================================================
+
+            await esperar(
+                TEMPO_RESULTADO
+            );
+
+
+            // =====================================================
+            // "PODE PROSSEGUIR"
+            // APENAS EM EVENTOS LIBERADOS
+            // =====================================================
+
+            if (
+
+                dados.evento
+                ===
+                "ENTRADA"
+
+                ||
+
+                dados.evento
+                ===
+                "SAIDA"
+
+                ||
+
+                dados.evento
+                ===
+                "JA_PRESENTE"
+
+                ||
+
+                dados.evento
+                ===
+                "ENTRADA_VISITANTE"
+
+                ||
+
+                dados.evento
+                ===
+                "SAIDA_VISITANTE"
+
+                ||
+
+                dados.evento
+                ===
+                "VISITANTE_JA_PRESENTE"
+
+            ) {
+
+                mensagem.innerText =
+                    "Pode prosseguir";
+
+            }
+
+
+            // =====================================================
+            // AGUARDA ROSTO SAIR
+            // =====================================================
+
+            aguardandoPessoaSair =
+                true;
+
+
+            processamentoEmAndamento =
                 false;
 
-
-            capturaEmAndamento =
-                false;
+        }
 
 
-            // -----------------------------------------------------
-            // VERDE -> AZUL
-            // -----------------------------------------------------
+        // =========================================================
+        // VERDE
+        // =========================================================
+
+        function aplicarVerde() {
+
+            moldura.classList.remove(
+                "negado"
+            );
+
+
+            moldura.classList.remove(
+                "processando"
+            );
+
+
+            moldura.classList.remove(
+                "procurando"
+            );
+
+
+            moldura.classList.add(
+                "reconhecido"
+            );
+
+
+            status.classList.remove(
+                "negado"
+            );
+
+
+            status.classList.remove(
+                "processando-status"
+            );
+
+
+            status.classList.remove(
+                "aguardando"
+            );
+
+
+            status.classList.add(
+                "autorizado"
+            );
+
+        }
+
+
+        // =========================================================
+        // VERMELHO
+        // =========================================================
+
+        function aplicarVermelho() {
 
             moldura.classList.remove(
                 "reconhecido"
+            );
+
+
+            moldura.classList.remove(
+                "processando"
+            );
+
+
+            moldura.classList.remove(
+                "procurando"
+            );
+
+
+            moldura.classList.add(
+                "negado"
+            );
+
+
+            status.classList.remove(
+                "autorizado"
+            );
+
+
+            status.classList.remove(
+                "processando-status"
+            );
+
+
+            status.classList.remove(
+                "aguardando"
+            );
+
+
+            status.classList.add(
+                "negado"
+            );
+
+        }
+
+
+        // =========================================================
+        // ERRO
+        // =========================================================
+
+        function mostrarErro(
+            texto
+        ) {
+
+            processamentoEmAndamento =
+                false;
+
+
+            aplicarVermelho();
+
+
+            nomePessoa.innerText =
+                "Erro";
+
+
+            mensagem.innerText =
+                texto;
+
+
+            statusTexto.innerText =
+                "Tente novamente";
+
+        }
+
+
+        // =========================================================
+        // VOLTAR PARA AGUARDANDO
+        // =========================================================
+
+        function voltarParaAguardando() {
+
+            moldura.classList.remove(
+                "reconhecido"
+            );
+
+
+            moldura.classList.remove(
+                "negado"
+            );
+
+
+            moldura.classList.remove(
+                "processando"
             );
 
 
@@ -857,30 +1344,35 @@
             );
 
 
+            status.classList.remove(
+                "negado"
+            );
+
+
+            status.classList.remove(
+                "processando-status"
+            );
+
+
             status.classList.add(
                 "aguardando"
             );
 
-
-            // -----------------------------------------------------
-            // TEXTOS INICIAIS
-            // -----------------------------------------------------
 
             nomePessoa.innerText =
                 "Posicione seu rosto";
 
 
             mensagem.innerText =
-                "Olhe para a câmera para realizar a identificação";
+                "Olhe para a câmera";
 
 
             statusTexto.innerText =
                 "Aguardando reconhecimento";
 
 
-            console.log(
-                "Sistema liberado para nova captura"
-            );
+            processamentoEmAndamento =
+                false;
 
         }
 
@@ -895,14 +1387,11 @@
 
             return new Promise(
 
-                function (resolve) {
-
+                resolve =>
                     setTimeout(
                         resolve,
                         milissegundos
-                    );
-
-                }
+                    )
 
             );
 
@@ -910,13 +1399,12 @@
 
 
         // =========================================================
-        // INICIAR SISTEMA
+        // INICIAR
         // =========================================================
 
         iniciarCamera();
 
     </script>
-
 
 </body>
 
